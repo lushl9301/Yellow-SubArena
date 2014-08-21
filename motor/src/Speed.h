@@ -8,6 +8,7 @@ public:
     Speed();
     Speed(MotorShield md);
     ~Speed();
+    
     void setM1SpeedLvl(int lvl);
     void setM2SpeedLvl(int lvl);
     void setSpeedLvls(int m1Lvl, int m2Lvl);
