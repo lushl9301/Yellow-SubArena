@@ -6,6 +6,7 @@ public:
     DataSmoothing();
     ~DataSmoothing();
     
-    void windowFilter7(int *ptr2RawData, int start, int end);
-}
+    void windowFilter7(int *ptr2RawData, int head);
+};
+#endif
 
