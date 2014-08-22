@@ -2,7 +2,7 @@
 #include "Speed.h"
 
 MotorShield md;
-
+Speed sp;
 void stopIfFault()
 {
   if (md.getM1Fault())
@@ -22,32 +22,29 @@ void setup()
   Serial.begin(115200);
   Serial.println("Dual VNH5019 Motor Shield");
   md.init();
+  sp.init(md);
 }
 
 void loop()
 {
-  for (int i = 0; i <= 400; i++)
+  for (int i = 1; i <= 4; i++)
   {
-    md.setM1Speed(i);
+    sp.setM1SpeedLvl(i);
+    //md.setM1Speed(i);
     stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M1 current: ");
-      Serial.println(md.getM1CurrentMilliamps());
-    }
-    delay(2);
+    Serial.print("M1 current: ");
+    Serial.println(md.getM1CurrentMilliamps());
+    delay(200);
   }
   
-  for (int i = 400; i >= -400; i--)
+  for (int i = 4; i >= 1; i--)
   {
-    md.setM1Speed(i);
+    sp.setM1SpeedLvl(0 - i);
+    //md.setM1Speed(i);
     stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M1 current: ");
-      Serial.println(md.getM1CurrentMilliamps());
-    }
-    delay(2);
+    Serial.print("M1 current: ");
+    Serial.println(md.getM1CurrentMilliamps());
+    delay(200);
   }
   
   for (int i = -400; i <= 0; i++)

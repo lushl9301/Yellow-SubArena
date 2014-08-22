@@ -8,6 +8,10 @@ Speed::Speed(MotorShield md) {
     _md = md;
 }
 
+void Speed::init(MotorShield md) {
+    _md = md;
+}
+
 void Speed::setM1SpeedLvl(int lvl) {
     switch (lvl) {
         case 1:
