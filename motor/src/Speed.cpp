@@ -4,11 +4,11 @@ Speed::Speed() {
     ;
 }
 
-Speed::Speed(MotorShield md) {
+Speed::Speed(MotorShield& md) {
     _md = md;
 }
 
-void Speed::init(MotorShield md) {
+void Speed::init(MotorShield& md) {
     _md = md;
 }
 

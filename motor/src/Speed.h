@@ -6,9 +6,9 @@
 class Speed {
 public:
     Speed();
-    Speed(MotorShield md);
+    Speed(MotorShield& md);
     
-    void init(MotorShield md);
+    void init(MotorShield& md);
     void setM1SpeedLvl(int lvl);
     void setM2SpeedLvl(int lvl);
     void setSpeedLvls(int m1Lvl, int m2Lvl);

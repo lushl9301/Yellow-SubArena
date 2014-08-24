@@ -19,6 +19,8 @@ class MotorShield
     void setM1Brake(int brake); // Brake M1. 
     void setM2Brake(int brake); // Brake M2.
     void setBrakes(int m1Brake, int m2Brake); // Brake both M1 and M2.
+    void brakeWithABS();
+    
     unsigned int getM1CurrentMilliamps(); // Get current reading for M1. 
     unsigned int getM2CurrentMilliamps(); // Get current reading for M2.
     unsigned char getM1Fault(); // Get fault reading from M1.
