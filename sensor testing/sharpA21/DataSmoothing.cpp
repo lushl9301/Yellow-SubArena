@@ -1,7 +1,4 @@
-#include <iostream>
 #include "DataSmoothing.h"
-
-using namespace std;
 
 DataSmoothing::DataSmoothing() {
     ;
@@ -34,7 +31,13 @@ void DataSmoothing::windowFilter7(int *ptr2RawData, int head) {
         }
     }
     out += *(ptr2RawData + tail) * coef[t];
-    
-    *(ptr2RawData + head + 1) = out / 28;
-    
+    ++tail;
+    if (tail > 6) {
+      tail = 0;
+    }
+    if (out < 0) {
+      *(ptr2RawData + tail) = 50;
+    } else {
+      *(ptr2RawData + tail) = out / 28;
+    }
 }
