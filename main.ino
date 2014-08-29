@@ -5,14 +5,14 @@
 #include "Speed.h"     // Set Speed
 #include "Cornering.h" // Turning
 
-#define urPWM_F 1
-#define urTRIG_F 2
+#define urPWM_F 2
+#define urTRIG_F 3
 
-#define urPWM_L 3
-#define urTRIG_L 4
+#define urPWM_L 4
+#define urTRIG_L 5
 
-#define urPWM_R 5
-#define urTRIG_R 6
+#define urPWM_R 6
+#define urTRIG_R 7
 
 #define motor_L A0
 #define motor_R A1
@@ -64,15 +64,4 @@ void setup() {
 
 void loop() {
 
-}
-
-void stopIfFault() {
-    if (md.getM1Fault()) {
-        Serial.println("M1 fault");
-        while(1);
-    }
-    if (md.getM2Fault()) {
-        Serial.println("M2 fault");
-        while(1);
-    }
 }

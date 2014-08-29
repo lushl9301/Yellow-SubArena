@@ -3,16 +3,6 @@
 
 MotorShield md;
 Speed sp;
-void stopIfFault() {
-  if (md.getM1Fault()) {
-    Serial.println("M1 fault");
-    while(1);
-  }
-  if (md.getM2Fault()) {
-    Serial.println("M2 fault");
-    while(1);
-  }
-}
 
 void setup() {
   Serial.begin(115200);
@@ -26,7 +16,6 @@ void loop() {
     sp.setM1SpeedLvl(i);
     sp.setM2SpeedLvl(i);
     //md.setM1Speed(i);
-    stopIfFault();
     Serial.print("M1 current: ");
     Serial.println(md.getM1CurrentMilliamps());
     delay(1000);
@@ -36,56 +25,8 @@ void loop() {
     sp.setM1SpeedLvl(0 - i);
     sp.setM2SpeedLvl(0 - i);
     //md.setM1Speed(i);
-    stopIfFault();
     Serial.print("M1 current: ");
     Serial.println(md.getM1CurrentMilliamps());
     delay(1000);
   }
-  /*
-  for (int i = -400; i <= 0; i++) {
-    md.setM1Speed(i);
-    stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M1 current: ");
-      Serial.println(md.getM1CurrentMilliamps());
-    }
-    delay(2);
-  }
-
-  for (int i = 0; i <= 400; i++)
-  {
-    md.setM2Speed(i);
-    stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M2 current: ");
-      Serial.println(md.getM2CurrentMilliamps());
-    }
-    delay(2);
-  }
-  
-  for (int i = 400; i >= -400; i--)
-  {
-    md.setM2Speed(i);
-    stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M2 current: ");
-      Serial.println(md.getM2CurrentMilliamps());
-    }
-    delay(2);
-  }
-  
-  for (int i = -400; i <= 0; i++)
-  {
-    md.setM2Speed(i);
-    stopIfFault();
-    if (i%200 == 100)
-    {
-      Serial.print("M2 current: ");
-      Serial.println(md.getM2CurrentMilliamps());
-    }
-    delay(2);
-  }*/
 }
