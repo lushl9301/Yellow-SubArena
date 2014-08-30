@@ -7,7 +7,7 @@ MotorShield::MotorShield() {
     _INA1 = 2;
     _INB1 = 4;
     //_EN1DIAG1 = 6; //not enough pin. kick out
-    //_CS1 = A0; 
+    //_CS1 = A0;
     _INA2 = 7;
     _INB2 = 8;
     //_EN2DIAG2 = 12; //not enough pin. kick out

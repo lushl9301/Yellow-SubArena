@@ -15,31 +15,31 @@ void Speed::init(MotorShield& md) {
 void Speed::setM1SpeedLvl(int lvl) {
     switch (lvl) {
         case 1:
-            _md.setM1Speed(65);
+            _md.setM1Speed(100);
             break;
         case 2:
-            _md.setM1Speed(130);
+            _md.setM1Speed(200);
             break;
         case 3:
-            _md.setM1Speed(195);
+            _md.setM1Speed(300);
             break;
         case 4:
-            _md.setM1Speed(255);
+            _md.setM1Speed(400);
             break;
         case -1:
-            _md.setM1Speed(-65);
+            _md.setM1Speed(-100);
             break;
         case -2:
-            _md.setM1Speed(-130);
+            _md.setM1Speed(-200);
             break;
         case -3:
-            _md.setM1Speed(-195);
+            _md.setM1Speed(-300);
             break;
         case -4:
-            _md.setM1Speed(-255);
+            _md.setM1Speed(-400);
             break;
         default:
-            _md.setM1Speed(40);
+            _md.setM1Speed(100);
             break;
     }
 }
@@ -47,31 +47,31 @@ void Speed::setM1SpeedLvl(int lvl) {
 void Speed::setM2SpeedLvl(int lvl) {
     switch (lvl) {
         case 1:
-            _md.setM2Speed(65);
+            _md.setM2Speed(100);
             break;
         case 2:
-            _md.setM2Speed(130);
+            _md.setM2Speed(200);
             break;
         case 3:
-            _md.setM2Speed(195);
+            _md.setM2Speed(300);
             break;
         case 4:
-            _md.setM2Speed(255);
+            _md.setM2Speed(400);
             break;
         case -1:
-            _md.setM2Speed(-65);
+            _md.setM2Speed(-100);
             break;
         case -2:
-            _md.setM2Speed(-130);
+            _md.setM2Speed(-200);
             break;
         case -3:
-            _md.setM2Speed(-195);
+            _md.setM2Speed(-300);
             break;
         case -4:
-            _md.setM2Speed(-255);
+            _md.setM2Speed(-400);
             break;
         default:
-            _md.setM2Speed(40);
+            _md.setM2Speed(100);
             break;
     }
 }
