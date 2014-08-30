@@ -4,24 +4,30 @@
 #include "HMC5883L.h"  // Digital Compass
 #include "Speed.h"     // Set Speed
 #include "Cornering.h" // Turning
+#include "avr/io.h"    // hmm
+#include "avr/interrupt.h" //
 
-#define urPWM_F 2
-#define urTRIG_F 3
+#define urPWM_F 15
+#define urTRIG_F 14
 
-#define urPWM_L 4
-#define urTRIG_L 5
+#define urPWM_L 1
+#define urTRIG_L 0
 
-#define urPWM_R 6
-#define urTRIG_R 7
+#define urPWM_R 13
+#define urTRIG_R 11
 
-#define motor_L A0
-#define motor_R A1
+#define motor_L 3  // encoder
+#define motor_R 5  // encoder
 
 /**********************/
-#define shortIR_LF_in A2
-#define shortIR_LR_in A3
-#define longIR_F_in A4
+#define shortIR_LF_in A4
+#define shortIR_LR_in A5
+//#define longIR_F_in A4
 /**********************/
+#define RisingEdgePerGrid 400 // need testing
+#define RisingEdgePerTurn 400 // need testing
+
+
 URM37 u_F, u_L, u_R;
 SharpA02 longIR_F;
 SharpA21 shortIR_LF, shortIR_LR;
@@ -32,7 +38,18 @@ Cornering cn;
 
 void setPinsMode() {
     //analog pins no need
+    //so IR sensor no need
     //digital pins are set in URM37.h
+    //
+    //TODO ===> set moto sensor in
+    pinMode(motor_R, INPUT);
+    pinMode(motor_L, INPUT);
+}
+
+void waitForCommand() {
+    while (!Serial.available() || Serial.read() != 'S') {
+    }
+    delay(10);
 }
 
 void setup() {
@@ -55,13 +72,47 @@ void setup() {
     //set up IR sensor
     shortIR_LR.init(shortIR_LR_in);
     shortIR_LF.init(shortIR_LF_in);
-    longIR_F.init(longIR_F_in);
+    //longIR_F.init(longIR_F_in);
     delay(10);
-    while (!Serial.available() || Serial.read() != 'S') {
-        delay(10);
-    }
 }
 
 void loop() {
+    waitForCommand();
+    exploration();
+    waitForCommand();
+    //memoryLane();
+    bridesheadRevisited();
+}
 
+void setTimerInterrupt() {
+  cli();          // disable global interrupts
+  // Timer/Counter Control Registers
+  TCCR1A = 0;     // set entire TCCR1A register to 0
+  TCCR1B = 0;     // same for TCCR1B
+
+  // set compare match register to desired timer count:
+  OCR1A = 1562;   // scale = 1024, OCR1A = (xxx / 64 / 1024)
+
+  // turn on CTC mode:
+  TCCR1B |= (1 << WGM12);
+  // Set CS10 and CS12 bits for 1024 prescaler:
+  TCCR1B |= (1 << CS10);
+  TCCR1B |= (1 << CS12);
+
+  //  enable timer compare interrupt:
+  //  Timer/Counter Interrupt Mask Register
+  //  Compare A&B interrupts 
+  TIMSK1 |= (1 << OCIE1A);
+  sei();          // enable global interrupts
+}
+void detachTimerInterrupt() {
+  cli();
+  TIMSK1 = 0; // disable
+  sei();
+}
+ISR(TIMER1_COMPA_vect) {
+  if (speedMode == 0)
+    md.setM1Speed((200 + leftCompensate) * neg);
+  else
+    md.setM1Speed((350 + leftCompensate) * neg);
 }
