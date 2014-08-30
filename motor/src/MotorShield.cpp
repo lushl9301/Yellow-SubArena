@@ -6,26 +6,26 @@ MotorShield::MotorShield() {
     //Pin map
     _INA1 = 2;
     _INB1 = 4;
-    _EN1DIAG1 = 6; //not enough pin. kick out
-    _CS1 = A0; 
+    //_EN1DIAG1 = 6; //not enough pin. kick out
+    //_CS1 = A0; 
     _INA2 = 7;
     _INB2 = 8;
-    _EN2DIAG2 = 12; //not enough pin. kick out
-    _CS2 = A1;
+    //_EN2DIAG2 = 12; //not enough pin. kick out
+    //_CS2 = A1;
 }
 
-MotorShield::MotorShield(unsigned char INA1, unsigned char INB1, unsigned char EN1DIAG1, unsigned char CS1, 
-                         unsigned char INA2, unsigned char INB2, unsigned char EN2DIAG2, unsigned char CS2) {
+MotorShield::MotorShield(unsigned char INA1, unsigned char INB1, 
+                         unsigned char INA2, unsigned char INB2) {
     //Pin map
     //PWM1 and PWM2 cannot be remapped because the library assumes PWM is on timer1
     _INA1 = INA1;
     _INB1 = INB1;
     //_EN1DIAG1 = EN1DIAG1;
-    _CS1 = CS1;
+    //_CS1 = CS1;
     _INA2 = INA2;
     _INB2 = INB2;
     //_EN2DIAG2 = EN2DIAG2;
-    _CS2 = CS2;
+    //_CS2 = CS2;
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
@@ -36,12 +36,12 @@ void MotorShield::init() {
     pinMode(_INB1,OUTPUT);
     pinMode(_PWM1,OUTPUT);
     //pinMode(_EN1DIAG1,INPUT);
-    pinMode(_CS1,INPUT);
+    //pinMode(_CS1,INPUT);
     pinMode(_INA2,OUTPUT);
     pinMode(_INB2,OUTPUT);
     pinMode(_PWM2,OUTPUT);
     //pinMode(_EN2DIAG2,INPUT);
-    pinMode(_CS2,INPUT);
+    //pinMode(_CS2,INPUT);
 #if defined(__AVR_ATmega168__)|| defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)
     // Timer 1 configuration
     // prescaler: clockI/O / 1
@@ -170,6 +170,7 @@ void MotorShield::brakeWithABS() {
     }
 }
 
+/*
 // Return motor 1 current value in milliamps.
 unsigned int MotorShield::getM1CurrentMilliamps() {
     // 5V / 1024 ADC counts / 144 mV per A = 34 mA per count
@@ -182,7 +183,6 @@ unsigned int MotorShield::getM2CurrentMilliamps() {
     return analogRead(_CS2) * 34;
 }
 
-/*
 // Return error status for motor 1 
 unsigned char MotorShield::getM1Fault() {
     return !digitalRead(_EN1DIAG1);
