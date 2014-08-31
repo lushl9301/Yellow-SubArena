@@ -1,6 +1,8 @@
 #ifndef URM37_h
 #define URM37_h
 
+#include "Arduino.h"
+
 class URM37 {
 public:
     URM37();
@@ -12,7 +14,7 @@ public:
 private:
     int _URPWM;
     int _URTRIG;
-    uint8_t EnPwmCmd[4]={0x44,0x02,0xbb,0x01};
 };
 
 #endif
+

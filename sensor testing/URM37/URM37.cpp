@@ -1,9 +1,9 @@
 #include "URM37.h"
 
 URM37::URM37() {
-    ;
 }
 
+uint8_t EnPwmCmd[4]={0x44,0x02,0xbb,0x01};
 void URM37::init(int URPWM, int URTRIG) {
     _URPWM = URPWM;
     _URTRIG = URTRIG;
@@ -25,3 +25,4 @@ int URM37::getDis() {
     
     return pulseIn(_URPWM, LOW) / 50;
 }
+
