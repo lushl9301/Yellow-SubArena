@@ -7,6 +7,8 @@
 #include "avr/io.h"    // hmm
 #include "avr/interrupt.h" //
 
+//PWM for reading ==> orange
+//TRIG for writing ==> yellow  
 #define urPWM_F 15
 #define urTRIG_F 14
 
