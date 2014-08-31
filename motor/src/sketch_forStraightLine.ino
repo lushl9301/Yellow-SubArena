@@ -11,10 +11,10 @@
 
 MotorShield md;
 
-volatile int direction;
+volatile int direction = 1;
 volatile int delta;
 volatile int rightMCtr, leftMCtr;
-
+volatile long timer;
 
 void setup() {
     pinMode(motor_R, INPUT);
@@ -23,68 +23,31 @@ void setup() {
 }
 
 void loop() {
-  //direction = 1;
-  //turn90Degree(3, 1);
-  //delay(3000);
-
-  //turn90Degree(3, -1);
-  //delay(3000);
-  //direction = 1;
-  //goStraight(3);
-  //delay(3000);
-    int grid = 2;
-    rightMCtr = leftMCtr = RisingEdgePerGrid * grid;
+    int grid = 3;
     delta = 0;
-    
+    timer = 0;
+    rightMCtr = leftMCtr = 400 * grid;
+
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
-    md.init();
-    md.setSpeeds(300, 300);    
+
     //sp.setSpeedLvls(3, 3);
-    //md.setM1Speed(100);
-    while (leftMCtr--) {
-        while (digitalRead(motor_L)) {
-          ;
-        }
-        while (!digitalRead(motor_L)) {
-          ;
-        }
+    md.init();
+    md.setSpeeds(300, 300);
+    while (--leftMCtr) {
+        while (digitalRead(motor_L));
+        while (!digitalRead(motor_L));
         //wait for one cycle
     }
-    detachInterrupt(1);
-    detachTimerInterrupt();
 
-    md.setBrakes(400, 400);
-    //Serial.println(delta);
+    detachTimerInterrupt();
+    detachInterrupt(1);
+
+    md.brakeWithABS();
+    Serial.println(delta);
+    Serial.println(timer);
     delay(3000);
 }
-/*
-void turn90Degree(int speedLvl, int direction) {
-    rightMCtr = leftMCtr = RisingEdgePerTurn;
-    delta = 0;
-    
-    setTimerInterrupt();
-    attachInterrupt(1, countRight, RISING);
-    md.init();
-    md.setSpeeds(300, -300);
-
-    while (leftMCtr--) {
-        while (digitalRead(motor_L)) {
-          ;
-        }
-        while (!digitalRead(motor_L)) {
-          ;
-        }
-        //wait for one cycle
-    }
-    detachInterrupt(1);
-    detachTimerInterrupt();
-
-    md.setBrakes(400, 400);
-    Serial.println(delta);
-    delay(1000);
-}
-*/
 
 void countRight() {
     --rightMCtr;
@@ -98,7 +61,7 @@ void setTimerInterrupt() {
   TCCR1B = 0;     // same for TCCR1B
 
   // set compare match register to desired timer count:
-  OCR1A = 1062;   // scale = 1024, OCR1A = (xxx / 64 / 1024)
+  OCR1A = 1562;   // scale = 1024, OCR1A = (xxx / 64 / 1024)
 
   // turn on CTC mode:
   TCCR1B |= (1 << WGM12);
@@ -114,9 +77,10 @@ void setTimerInterrupt() {
 }
 void detachTimerInterrupt() {
   cli();
-  TIMSK1 = 0; // disable
+  TIMSK1 &= 0; // disable
   sei();
 }
 ISR(TIMER1_COMPA_vect) {
-    md.setM2Speed((300 - delta*4) * direction);
+    md.setM2Speed((300 - delta*5) * direction);
+    ++timer;
 }
