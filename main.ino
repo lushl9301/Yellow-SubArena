@@ -80,10 +80,47 @@ void setup() {
 
 void loop() {
     waitForCommand();
+    x = 10;
+    y = 7;
+    cycle = 0;
+    pwd = 1;
     exploration();
     waitForCommand();
-    //memoryLane();
+    getSPInstructions();
     bridesheadRevisited();
+}
+void exploration() {
+    int counter_for_step = 0;
+    while (cycle >= 1 && x <= 2 && y <= 2) {
+        //check right
+        turn(1);
+        thinkForAWhile();
+        goAhead(1);
+        thinkForAWhile();
+    }
+}
+
+void bridesheadRevisited() {
+    //follow instruction
+    //
+    //turn(1);
+    //turn(-1);
+    //goAhead(l);
+}
+
+void thinkForAWhile() {
+    //TODO
+    //see and think
+    //send and delay
+}
+void turn(int direction) {
+    //TODO
+    //rotate
+    //update current direction
+}
+void getSPInstructions() {
+    //TODO
+    //get shortest path from RPi
 }
 
 void setTimerInterrupt() {
@@ -117,4 +154,15 @@ ISR(TIMER1_COMPA_vect) {
     md.setM1Speed((200 + leftCompensate) * neg);
   else
     md.setM1Speed((350 + leftCompensate) * neg);
+}
+
+void straighten() {
+    //Ultrasonic go until 5cm
+    for (int i = 0; i < 100; i++) {
+        if (shortIR_LR.getDis() > shortIR_LF.getDis()) {
+            md.setSpeeds(-300, 300);
+        } else if (shortIR_LR.getDis() < shortIR_LF.getDis()) {
+            md.setSpeeds(300, -300);
+        }
+    }
 }
