@@ -1,5 +1,5 @@
 #include "MotorShield.h"
-#include "Speed.h"
+#include "Wheels.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
@@ -31,7 +31,6 @@ void loop() {
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
 
-    //sp.setSpeedLvls(3, 3);
     md.init();
     md.setSpeeds(300, 300);
     while (--leftMCtr) {

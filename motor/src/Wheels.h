@@ -1,12 +1,12 @@
-#ifndef Speed_h
-#define Speed_h
+#ifndef Wheels_h
+#define Wheels_h
 
 #include "MotorShield.h"
 
-class Speed {
+class Wheels {
 public:
-    Speed();
-    Speed(MotorShield& md);
+    Wheels();
+    Wheels(MotorShield& md);
     
     void init(MotorShield& md);
     void setM1SpeedLvl(int lvl);

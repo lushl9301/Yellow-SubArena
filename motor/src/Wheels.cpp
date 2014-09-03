@@ -1,18 +1,18 @@
-#include "Speed.h"
+#include "Wheels.h"
 
-Speed::Speed() {
+Wheels::Wheels() {
     ;
 }
 
-Speed::Speed(MotorShield& md) {
+Wheels::Wheels(MotorShield& md) {
     _md = md;
 }
 
-void Speed::init(MotorShield& md) {
+void Wheels::init(MotorShield& md) {
     _md = md;
 }
 
-void Speed::setM1SpeedLvl(int lvl) {
+void Wheels::setM1SpeedLvl(int lvl) {
     switch (lvl) {
         case 1:
             _md.setM1Speed(100);
@@ -44,7 +44,7 @@ void Speed::setM1SpeedLvl(int lvl) {
     }
 }
 
-void Speed::setM2SpeedLvl(int lvl) {
+void Wheels::setM2SpeedLvl(int lvl) {
     switch (lvl) {
         case 1:
             _md.setM2Speed(100);
@@ -76,19 +76,19 @@ void Speed::setM2SpeedLvl(int lvl) {
     }
 }
 
-void Speed::setSpeedLvls(int m1Lvl, int m2Lvl) {
+void Wheels::setSpeedLvls(int m1Lvl, int m2Lvl) {
     setM1SpeedLvl(m1Lvl);
     setM2SpeedLvl(m2Lvl);
 }
 
-void Speed::setM1BrakeLvls(int lvl) {
+void Wheels::setM1BrakeLvls(int lvl) {
     ;
 }
 
-void Speed::setM2BrakeLvls(int lvl) {
+void Wheels::setM2BrakeLvls(int lvl) {
     ;
 }
 
-void Speed::setBrakeLvls(int m1Lvl, int m2Lvl) {
+void Wheels::setBrakeLvls(int m1Lvl, int m2Lvl) {
     ;    
 }

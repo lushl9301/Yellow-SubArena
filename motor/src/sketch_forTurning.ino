@@ -1,5 +1,5 @@
 #include "MotorShield.h"
-#include "Speed.h"
+#include "Wheels.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
@@ -34,7 +34,6 @@ void turn() {
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
 
-    //sp.setSpeedLvls(3, 3);
     md.init();
     md.setSpeeds(-200 * direction, 200 * direction);
     while (--leftMCtr) {
