@@ -1,9 +1,7 @@
 #include "SharpA21.h"  // Short-distance
 #include "SharpA02.h"  // Long-distance
 #include "URM37.h"     // Ultrasonic
-#include "HMC5883L.h"  // Digital Compass
-#include "Speed.h"     // Set Speed
-#include "Cornering.h" // Turning
+//#include "HMC5883L.h"  // Digital Compass
 #include "avr/io.h"    // hmm
 #include "avr/interrupt.h" //
 
@@ -15,28 +13,33 @@
 #define urPWM_L 1
 #define urTRIG_L 0
 
-#define urPWM_R 13
-#define urTRIG_R 11
+#define urPWM_R A2
+#define urTRIG_R A3
 
-#define motor_L 3  // encoder
-#define motor_R 5  // encoder
+#define motor_L 13  // encoder
+#define motor_R 3   // encoder
 
 /**********************/
 #define shortIR_LF_in A4
-#define shortIR_LR_in A5
+#define shortIR_RF_in A5
 //#define longIR_F_in A4
 /**********************/
 #define RisingEdgePerGrid 400 // need testing
-#define RisingEdgePerTurn 400 // need testing
+#define RisingEdgePerTurn_200 367 //for speed 200
+#define stepToStraighten 5 //every 5 step make a auto adjust
+
+
+volatile int currentDirection;
+volatile int delta;
+volatile int rightMCtr, leftMCtr;
+volatile long timer;
 
 
 URM37 u_F, u_L, u_R;
 SharpA02 longIR_F;
-SharpA21 shortIR_LF, shortIR_LR;
+SharpA21 shortIR_LF, shortIR_RF;
 
 MotorShield md;
-Speed sp;
-Cornering cn;
 
 void setPinsMode() {
     //analog pins no need
@@ -72,7 +75,7 @@ void setup() {
     delay(10);
     
     //set up IR sensor
-    shortIR_LR.init(shortIR_LR_in);
+    shortIR_RF.init(shortIR_RF_in);
     shortIR_LF.init(shortIR_LF_in);
     //longIR_F.init(longIR_F_in);
     delay(10);
@@ -80,24 +83,88 @@ void setup() {
 
 void loop() {
     waitForCommand();
-    x = 10;
-    y = 7;
-    cycle = 0;
+    goalX = 1;
+    goalY = 1;
+    currentX = 10;
+    currentY = 7;
     pwd = 1;
+    int counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     exploration();
     waitForCommand();
-    getSPInstructions();
+    getFRInstructions();
+    currentX = 1;
+    currentY = 1;
     bridesheadRevisited();
 }
 void exploration() {
-    int counter_for_step = 0;
-    while (cycle >= 1 && x <= 2 && y <= 2) {
+
+    findWall();
+    /*
+    find my way to start point
+    then make a travel
+     */
+    goalX = 1;
+    goalY = 1;
+    while ()
+
+    empty_space_R = 0;
+    while (abs(goalX - currentX) >= 2 && abs(goalY - currentY) >= 2) {
         //check right
-        turn(1);
+        
+        //get all sensor data here.
+
+        u_F_dis = u_F.getDis();
+        u_L_dis = u_L.getDis();
+        u_R_dis = u_R.getDis();
         thinkForAWhile();
+
+        if (u_R_dis > 12) { //right got space
+            ++empty_space_R;
+            if (empty_space_R >= 2) {
+                turn(1);
+                continue;
+            }
+        } else {
+            empty_space_R = 0;
+
+            if (--counter_for_straighten == 0) {    //auto fix
+                turn(1);    //turn right
+                straighten();
+                turn(-1);   //turn left
+                counter_for_straighten = stepToStraighten;
+            }
+        }
+
+        if (u_F_dis <= 6) {
+            straighten();
+            turn(-1);   //turn left
+            continue;
+        }
+
+        //default go ahead
         goAhead(1);
-        thinkForAWhile();
     }
+}
+
+void findWall() {
+    //find the closest obstacle
+    //go and auto fix
+    //go back
+    //find farthest obstacle according to the distance
+    //go that way
+    //
+    
+    /*
+    HOWTO find closest obstacle
+    360 turning. use sensor to see the distance
+     */
+    
+    /*
+    HOWTO find fasest obstacle
+    go back
+    find the farthest distance
+    take this as the wall?
+     */
 }
 
 void bridesheadRevisited() {
@@ -106,6 +173,7 @@ void bridesheadRevisited() {
     //turn(1);
     //turn(-1);
     //goAhead(l);
+    getFRInstructions();
 }
 
 void thinkForAWhile() {
@@ -113,14 +181,50 @@ void thinkForAWhile() {
     //see and think
     //send and delay
 }
-void turn(int direction) {
+
+boolean turn(int direction) {
     //TODO
+    //Check if can rotate
     //rotate
     //update current direction
+    
 }
-void getSPInstructions() {
+
+void getFRInstructions() {
     //TODO
     //get shortest path from RPi
+    //or Fast Run?
+}
+
+void straighten() {
+    adjustDistance();
+    adjustDirection();
+}
+
+void adjustDirection() {
+    //Ultrasonic go until 5cm
+    for (int i = 0; i < 1000; i++) {
+        if (shortIR_RF.getDis() > shortIR_LF.getDis()) {
+            md.setSpeeds(-60, 60);
+        } else if (shortIR_RF.getDis() < shortIR_LF.getDis()) {
+            md.setSpeeds(60, -60);
+        }
+    }
+    md.setBrakes(400, 400);
+}
+
+void adjustDistance() {
+    int frontDis = max(shortIR_LF.getDis(), shortIR_RF.getDis());
+    for (int i = 0; i < 1000; i++) {
+        if (frontDis < 450) {
+            md.setSpeeds(100, 100);
+        } else if (frontDis > 500) {
+            md.setSpeeds(-100, -100);
+        } else {
+            break;
+        }
+    }
+    md.setBrakes(400, 400);
 }
 
 void setTimerInterrupt() {
@@ -144,25 +248,16 @@ void setTimerInterrupt() {
   TIMSK1 |= (1 << OCIE1A);
   sei();          // enable global interrupts
 }
+
 void detachTimerInterrupt() {
   cli();
   TIMSK1 = 0; // disable
   sei();
 }
+
 ISR(TIMER1_COMPA_vect) {
   if (speedMode == 0)
     md.setM1Speed((200 + leftCompensate) * neg);
   else
     md.setM1Speed((350 + leftCompensate) * neg);
-}
-
-void straighten() {
-    //Ultrasonic go until 5cm
-    for (int i = 0; i < 100; i++) {
-        if (shortIR_LR.getDis() > shortIR_LF.getDis()) {
-            md.setSpeeds(-300, 300);
-        } else if (shortIR_LR.getDis() < shortIR_LF.getDis()) {
-            md.setSpeeds(300, -300);
-        }
-    }
 }
