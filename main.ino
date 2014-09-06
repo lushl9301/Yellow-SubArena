@@ -2,8 +2,9 @@
 #include "SharpA02.h"  // Long-distance
 #include "URM37.h"     // Ultrasonic
 //#include "HMC5883L.h"  // Digital Compass
-#include "avr/io.h"    // hmm
-#include "avr/interrupt.h" //
+
+#include "movement.h"  // turn & goAhead
+
 
 //PWM for reading ==> orange
 //TRIG for writing ==> yellow  
@@ -34,6 +35,9 @@ volatile int delta;
 volatile int rightMCtr, leftMCtr;
 volatile long timer;
 
+int counter_for_straighten;
+int currentX, currentY;
+int goalX, goalY;
 
 URM37 u_F, u_L, u_R;
 SharpA02 longIR_F;
@@ -83,15 +87,26 @@ void setup() {
 
 void loop() {
     waitForCommand();
-    goalX = 1;
-    goalY = 1;
+
     currentX = 10;
     currentY = 7;
-    startX = 10;
-    startY = 7;
     pwd = 1;
-    int counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
+    counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
+    findWall();
+    goalX = 1;
+    goalY = 1;
     exploration();
+    delay(1000);
+
+    goalX = 20;
+    goalY = 15;
+    exploration();
+    delay(1000);
+
+    goalX = 1;
+    goalY = 1;
+    exploration();
+
     waitForCommand();
     getFRInstructions();
     currentX = 1;
@@ -99,22 +114,21 @@ void loop() {
     bridesheadRevisited();
 }
 void exploration() {
-
-    findWall();
-    /*
-    find my way to start point
-    then make a travel
-     */
-
     empty_space_R = 0;
     while (abs(goalX - currentX) >= 2 && abs(goalY - currentY) >= 2) {
         //check right
         
         //get all sensor data here.
-
         u_F_dis = u_F.getDis();
         u_L_dis = u_L.getDis();
         u_R_dis = u_R.getDis();
+
+        ir_rf_dis = shortIR_RF.getDis();
+        ir_lf_dis = shortIR_LF.getDis();
+
+        ir_r_dis = shortIR_R.getDis();
+        ir_l_dis = longIR_F.getDis(); 
+        
         thinkForAWhile();
 
         if (u_R_dis > 12) { //right got space
@@ -151,9 +165,7 @@ void findWall() {
     //go back
     //find farthest obstacle according to the distance
     //go that way
-    
-    
-    
+  
     /*
     HOWTO find closest obstacle
     360 turning. use sensor to see the distance
@@ -205,7 +217,6 @@ void findWall() {
     straighten();
     //auto fix
 
-
     /*
     HOWTO find fasest obstacle
     1. go back
@@ -236,6 +247,11 @@ void findWall() {
         goAhead(1);
     }
     straighten();
+
+    turn(-1);
+    //turn left
+    //start stick2TheWall & turn right
+    //job done
 }
 
 void bridesheadRevisited() {
@@ -251,14 +267,6 @@ void thinkForAWhile() {
     //TODO
     //see and think
     //send and delay
-}
-
-boolean turn(int direction) {
-    //TODO
-    //Check if can rotate
-    //rotate
-    //update current direction
-    
 }
 
 void getFRInstructions() {
@@ -296,39 +304,4 @@ void adjustDistance() {
         }
     }
     md.setBrakes(400, 400);
-}
-
-void setTimerInterrupt() {
-  cli();          // disable global interrupts
-  // Timer/Counter Control Registers
-  TCCR1A = 0;     // set entire TCCR1A register to 0
-  TCCR1B = 0;     // same for TCCR1B
-
-  // set compare match register to desired timer count:
-  OCR1A = 1562;   // scale = 1024, OCR1A = (xxx / 64 / 1024)
-
-  // turn on CTC mode:
-  TCCR1B |= (1 << WGM12);
-  // Set CS10 and CS12 bits for 1024 prescaler:
-  TCCR1B |= (1 << CS10);
-  TCCR1B |= (1 << CS12);
-
-  //  enable timer compare interrupt:
-  //  Timer/Counter Interrupt Mask Register
-  //  Compare A&B interrupts 
-  TIMSK1 |= (1 << OCIE1A);
-  sei();          // enable global interrupts
-}
-
-void detachTimerInterrupt() {
-  cli();
-  TIMSK1 = 0; // disable
-  sei();
-}
-
-ISR(TIMER1_COMPA_vect) {
-  if (speedMode == 0)
-    md.setM1Speed((200 + leftCompensate) * neg);
-  else
-    md.setM1Speed((350 + leftCompensate) * neg);
 }
