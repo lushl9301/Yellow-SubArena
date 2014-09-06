@@ -105,9 +105,6 @@ void exploration() {
     find my way to start point
     then make a travel
      */
-    goalX = 1;
-    goalY = 1;
-    while ()
 
     empty_space_R = 0;
     while (abs(goalX - currentX) >= 2 && abs(goalY - currentY) >= 2) {
