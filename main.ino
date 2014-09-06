@@ -87,6 +87,8 @@ void loop() {
     goalY = 1;
     currentX = 10;
     currentY = 7;
+    startX = 10;
+    startY = 7;
     pwd = 1;
     int counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     exploration();
@@ -152,19 +154,91 @@ void findWall() {
     //go back
     //find farthest obstacle according to the distance
     //go that way
-    //
+    
+    
     
     /*
     HOWTO find closest obstacle
     360 turning. use sensor to see the distance
      */
+    f_dis = min(shortIR_RF.getDis(), shortIR_LF.getDis());
+    int tempDis = f_dis;
+    int tempMin = 0;
+    for (int i = 1; i <= 4; ++i) {
+        turn(1);
+        f_dis = min(shortIR_RF.getDis(), shortIR_LF.getDis());
+        if (tempDis < f_dis && f_dis - tempDis > 50) {
+            //ignore small difference
+            tempMin = i;
+            tempDis = f_dis;
+        }
+    }
     
+    for (int i = tempMin; i > 0; --i) {
+        turn(1);
+    }
+
+    u_L_dis = u_F.getDis();
+    u_R_dis = u_R.getDis();
+
+    farthestX = currentX;
+    farthestY = currentY;
+    farthestDis = max(u_L_dis, u_R_dis);
+
+    while (1) {
+        u_F_dis = u_F.getDis();
+        if (u_F_dis <= 6) {
+            break;
+        }
+        goAhead(1);
+        u_L_dis = u_F.getDis();
+        u_R_dis = u_R.getDis();
+        if (u_L_dis > farthestDis) {
+            farthestDis = u_L_dis;
+            farthestX = currentX;
+            farthestY = currentY;
+        }
+        if (u_R_dis > farthestDis) {
+            farthestDis = u_R_dis;
+            farthestX = -currentX;
+            farthestY = -currentY;
+        }
+    }
+
+    straighten();
+    //auto fix
+
+
     /*
     HOWTO find fasest obstacle
-    go back
-    find the farthest distance
+    1. go back
+    2. find the farthest distance
     take this as the wall?
+    3. go to the wall
      */
+    turn(1);
+    turn(1);
+
+    grids2goback = abs(farthestX - currentX) + abs(farthestY - currentY);
+    goAhead(grids2goback);
+
+    if (farthestX < 0) {
+        turn(1);
+    } else {
+        turn(-1);
+
+    }
+    //found where is the wall
+    
+    //go to the wall
+    while (1) {
+        u_F_dis = u_F.getDis();
+        if (u_F_dis <= 6) {
+            break;
+        }
+        goAhead(1);
+    }
+    straighten();
 }
 
 void bridesheadRevisited() {
