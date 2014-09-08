@@ -9,14 +9,11 @@
 
 //PWM for reading ==> orange
 //TRIG for writing ==> yellow  
+#define urTRIG A3 //use one to write command
+
 #define urPWM_F 15
-#define urTRIG_F 14
-
-#define urPWM_L 1
-#define urTRIG_L 0
-
+#define urPWM_L 14
 #define urPWM_R A2
-#define urTRIG_R A3
 
 #define motor_L 13  // encoder
 #define motor_R 3   // encoder
@@ -265,31 +262,59 @@ void findWall() {
 void bridesheadRevisited() {
     //follow instruction
     //
-    //turn(1);
-    //turn(-1);
+    //turn(1); //right
+    //turn(-1); //left
     //goAhead(l);
     getFRInstructions();
 }
 
 void thinkForAWhile() {
-    //TODO
-    //see and think
+    //think
     //send and delay
-    Serial.println("UF" + String(u_F_dis));
-    Serial.println("IRLF" + String(ir_lf_dis));
-    Serial.println("IRRF" + String(ir_rf_dis));
+    Serial.println("UF " + String(u_F_dis));
+    Serial.println("IRLF " + String(ir_lf_dis));
+    Serial.println("IRRF " + String(ir_rf_dis));
 
-    Serial.println("UL" + String(u_L_dis));
-    Serial.println("IRL" + String(ir_l_dis));
+    Serial.println("UL " + String(u_L_dis));
+    Serial.println("IRL " + String(ir_l_dis));
     
-    Serial.println("UR" + String(u_R_dis));
-    Serial.println("IRR" + String(ir_r_dis));
+    Serial.println("UR " + String(u_R_dis));
+    Serial.println("IRR " + String(ir_r_dis));
 
     delay(500);
 }
 
-void getFRInstructions() {
+char getChar() {
+    while (!Serial.available());
+    return Serial.read();
+}
+
+void arriving() {
     //TODO
+    //when near the end point
+    //do nice stop
+}
+
+void getFRInstructions() {
     //get shortest path from RPi
-    //or Fast Run?
+    //then move
+
+    while (1) {
+        instrChar = getChar();
+        while (isDigit(instrChar)) {
+            instrString += instrChar;
+            instrChar = getChar();
+        }
+        if (instrString.length() > 0) {
+            goAhead(instrString.toInt());
+            instrString = "";
+        }
+        if (instrChar == 'R') {
+            turn(1);
+        } else if (instrChar == 'L') {
+            turn(-1);
+        } else if (instrChar == 'G') {
+            arriving();
+        }
+    }
 }
