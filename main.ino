@@ -86,6 +86,9 @@ void setup() {
     //set up IR sensor
     shortIR_RF.init(shortIR_RF_in);
     shortIR_LF.init(shortIR_LF_in);
+
+    shortIR_R.init(shortIR_R_in);
+    shortIR_L.init(shortIR_L_in);
     //longIR_F.init(longIR_F_in);
     delay(10);
 }
