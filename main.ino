@@ -4,6 +4,7 @@
 //#include "HMC5883L.h"  // Digital Compass
 
 #include "movement.h"  // turn & goAhead
+#include "autoFix.h"
 
 
 //PWM for reading ==> orange
@@ -23,6 +24,10 @@
 /**********************/
 #define shortIR_LF_in A4
 #define shortIR_RF_in A5
+
+#define shortIR_L_in A0
+#define shortIR_R_in A1
+
 //#define longIR_F_in A4
 /**********************/
 #define RisingEdgePerGrid 400 // need testing
@@ -267,41 +272,21 @@ void thinkForAWhile() {
     //TODO
     //see and think
     //send and delay
+    Serial.println("UF" + String(u_F_dis));
+    Serial.println("IRLF" + String(ir_lf_dis));
+    Serial.println("IRRF" + String(ir_rf_dis));
+
+    Serial.println("UL" + String(u_L_dis));
+    Serial.println("IRL" + String(ir_l_dis));
+    
+    Serial.println("UR" + String(u_R_dis));
+    Serial.println("IRR" + String(ir_r_dis));
+
+    delay(500);
 }
 
 void getFRInstructions() {
     //TODO
     //get shortest path from RPi
     //or Fast Run?
-}
-
-void straighten() {
-    adjustDistance();
-    adjustDirection();
-}
-
-void adjustDirection() {
-    //Ultrasonic go until 5cm
-    for (int i = 0; i < 1000; i++) {
-        if (shortIR_RF.getDis() > shortIR_LF.getDis()) {
-            md.setSpeeds(-60, 60);
-        } else if (shortIR_RF.getDis() < shortIR_LF.getDis()) {
-            md.setSpeeds(60, -60);
-        }
-    }
-    md.setBrakes(400, 400);
-}
-
-void adjustDistance() {
-    int frontDis = max(shortIR_LF.getDis(), shortIR_RF.getDis());
-    for (int i = 0; i < 1000; i++) {
-        if (frontDis < 450) {
-            md.setSpeeds(100, 100);
-        } else if (frontDis > 500) {
-            md.setSpeeds(-100, -100);
-        } else {
-            break;
-        }
-    }
-    md.setBrakes(400, 400);
 }
