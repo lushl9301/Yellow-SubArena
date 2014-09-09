@@ -161,12 +161,12 @@ void MotorShield::setBrakes(int m1Brake, int m2Brake) {
 }
 
 void MotorShield::brakeWithABS() {
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 20; i++) {
         setBrakes(100, 100);
-        delay(1);
-        setBrakes(200, 200);
-        delay(1);
-        setBrakes(255, 255);
+        delay(5);
+        setBrakes(300, 300);
+        delay(5);
+        setBrakes(400, 400);
     }
 }
 
