@@ -6,24 +6,27 @@
 #include "movement.h"  // turn & goAhead
 #include "autoFix.h"
 
+//digital 0, 1 are not alow to use ==> serial port is using
+//digital 2, 3, 4, 7, 8, 9, 10, 13 are occuppied by motor shield & encoder
+//A0, A1, 6, 12 need to be kicked out before use
 
 //PWM for reading ==> orange
 //TRIG for writing ==> yellow  
 #define urTRIG A3 //use one to write command
 
-#define urPWM_F 15
-#define urPWM_L 14
-#define urPWM_R A2
+#define urPWM_F 12
+#define urPWM_L A2
+#define urPWM_R 5
 
 #define motor_L 13  // encoder
-#define motor_R 3   // encoder
+#define motor_R 3     // encoder
 
-/**********************/
+
 #define shortIR_LF_in A4
 #define shortIR_RF_in A5
 
-#define shortIR_L_in A0
-#define shortIR_R_in A1
+#define longIR_L_in A1
+#define shortIR_R_in A0
 
 //#define longIR_F_in A4
 /**********************/
@@ -42,8 +45,10 @@ int currentX, currentY;
 int goalX, goalY;
 
 URM37 u_F, u_L, u_R;
-SharpA02 longIR_F;
-SharpA21 shortIR_LF, shortIR_RF;
+SharpA21 shortIR_LF, shortIR_RF, shortIR_R, longIR_L;
+
+int u_F_dis, u_R_dis, u_L_dis;
+int ir_rf_dis, ir_lf_dis, ir_l_dis, ir_r_dis;
 
 MotorShield md;
 
