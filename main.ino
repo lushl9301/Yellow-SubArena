@@ -45,7 +45,8 @@ int currentX, currentY;
 int goalX, goalY;
 
 URM37 u_F, u_L, u_R;
-SharpA21 shortIR_LF, shortIR_RF, shortIR_R, longIR_L;
+SharpA21 shortIR_LF, shortIR_RF, shortIR_R;
+SharpA02 longIR_L;
 
 int u_F_dis, u_R_dis, u_L_dis;
 int ir_rf_dis, ir_lf_dis, ir_l_dis, ir_r_dis;
@@ -80,9 +81,9 @@ void setup() {
     delay(10);
     
     //set up 3 Ultrasonic
-    u_F.init(urPWM_F, urTRIG_F);
-    u_L.init(urPWM_L, urTRIG_L);
-    u_R.init(urPWM_R, urTRIG_R);
+    u_F.init(urPWM_F, urTRIG);
+    u_L.init(urPWM_L, urTRIG);
+    u_R.init(urPWM_R, urTRIG);
     delay(10);
     
     //set up IR sensor
@@ -90,8 +91,7 @@ void setup() {
     shortIR_LF.init(shortIR_LF_in);
 
     shortIR_R.init(shortIR_R_in);
-    shortIR_L.init(shortIR_L_in);
-    //longIR_F.init(longIR_F_in);
+    longIR_L.init(longIR_L_in);
     delay(10);
 }
 
@@ -137,7 +137,7 @@ void exploration() {
         ir_lf_dis = shortIR_LF.getDis();
 
         ir_r_dis = shortIR_R.getDis();
-        ir_l_dis = longIR_F.getDis(); 
+        ir_l_dis = longIR_L.getDis();
         
         thinkForAWhile();
 
