@@ -1,5 +1,3 @@
-
-
 #include "SharpA21.h"  // Short-distance
 //#include "SharpA02.h"  // Long-distance
 #include "URM37.h"     // Ultrasonic
@@ -50,10 +48,16 @@ void setup() {
 
 void loop() {
 
-    u_F_dis = u_F.getDis();
-    u_L_dis = u_L.getDis();
-    u_R_dis = u_R.getDis();
-
+    while ((u_F_dis = u_F.getDis()) == 0) {
+        delay(50);
+    }
+    while ((u_L_dis = u_L.getDis()) == 0) {
+        delay(50);
+    }
+    while ((u_R_dis = u_R.getDis()) == 0) {
+        delay(50);
+    }
+    
     ir_rf_dis = shortIR_RF.getDis();
     ir_lf_dis = shortIR_LF.getDis();
 
@@ -71,5 +75,5 @@ void loop() {
     Serial.println("IRR " + String(ir_r_dis));
     Serial.println("\n\n\n");
 
-    delay(1000);
+    delay(1200);
 }
