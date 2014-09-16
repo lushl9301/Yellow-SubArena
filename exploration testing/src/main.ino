@@ -45,7 +45,12 @@ volatile int speedMode;  //1 for fast(400), 0 for slow(200)
 int counter_for_straighten;
 int empty_space_R;
 
-int pwd; // current direction
+int pwd = 1; // current direction
+//1 north
+//2 east
+//3 south
+//4 west
+
 int currentX, currentY;
 int goalX, goalY;
 
@@ -325,13 +330,13 @@ void arriving() {
     //face to
     //||
     //|| (1, 1)
-    //|| o ->
+    //|| o -> 2
     //==========
     //
     //OR
     //
     //===========
-    //    <- o ||
+    //  4 <- o ||
     // (20, 15)||
     //         ||
     //
@@ -379,7 +384,6 @@ void goAhead(int grids) {
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
 
-    //sp.setSpeedLvls(3, 3);
     md.init();
     md.setSpeeds(400, 400);
     while (--leftMCtr) {
@@ -392,6 +396,19 @@ void goAhead(int grids) {
     detachInterrupt(1);
 
     md.brakeWithABS();
+    
+    //update direciton
+    switch (pwd) {
+        case 1: currentY +=grids;
+                break;
+        case 2: currentX +=grids;
+                break;
+        case 3: currentY -=grids;
+                break;
+        case 4: currentX -=grids;
+                break;
+        default: break;
+    }
     delay(3000);
 }
 
@@ -417,6 +434,14 @@ void turn(int turnRight) {
     detachInterrupt(1);
 
     md.brakeWithABS();
+    
+    //update direction
+    pwd += turnRight;
+    if (pwd == 5) {
+        pwd = 1;
+    } else if (pwd == 0) {
+        pwd = 4;
+    }
     delay(3000);
 }
 
