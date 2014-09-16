@@ -202,8 +202,12 @@ void exploration() {
             continue;
         }
 
+        //TODO testing
         //default go ahead
-        goAhead(1);
+        if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
+            //can go
+            goAhead(1);
+        }
     }
 }
 
