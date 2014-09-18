@@ -13,7 +13,7 @@
 //5, 6, 11, 12
 
 //PWM for reading ==> orange
-//TRIG for writing ==> yellow  
+//TRIG for writing ==> yellow
 #define urTRIG A3 //use one to write command
 
 #define urPWM_F 12
