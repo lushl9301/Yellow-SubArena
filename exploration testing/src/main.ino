@@ -32,8 +32,8 @@
 
 //#define longIR_F_in A4
 /**********************/
-#define RisingEdgePerGrid 400 // need testing
-#define RisingEdgePerTurn_200 424 //for speed 200
+#define RisingEdgePerGrid 380 // need testing
+#define RisingEdgePerTurn_200 412 //for speed 200
 #define stepToStraighten 5 //every 5 step make a auto adjust
 
 
@@ -42,8 +42,8 @@ volatile int delta;
 volatile int rightMCtr, leftMCtr;
 volatile int speedMode;  //1 for fast(400), 0 for slow(200)
 
-int counter_for_straighten;
-int empty_space_R;
+volatile int counter_for_straighten;
+volatile int empty_space_R;
 
 int pwd = 1; // current direction
 //1 north
@@ -201,13 +201,13 @@ void exploration() {
                 turn(1);    //turn right
                 straighten();
                 turn(-1);   //turn left
-                counter_for_straighten = stepToStraighten;
+                counter_for_straighten = 5;
             }
         }
 
         if (u_F_dis <= 6) {
             Serial.println("shit in front");
-            straighten();
+            //straighten();
             turn(-1);   //turn left
             empty_space_R = 0;
             continue;
@@ -215,10 +215,10 @@ void exploration() {
 
         //TODO testing
         //default go ahead
-        if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
+        //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
             //can go
             goAhead(1);
-        }
+        //}
     }
 }
 
@@ -244,7 +244,7 @@ void findWall() {
         turn(1);
         sensorReading();
         f_dis = min(ir_rf_dis, ir_lf_dis);
-        if (tempDis < f_dis && f_dis - tempDis > 50) {
+        if (tempDis < f_dis && f_dis - tempDis > 10) {
             //ignore small difference
             tempMin = i;
             tempDis = f_dis;
@@ -295,8 +295,9 @@ void findWall() {
     int grids2goback = (abs(farthestX - currentX) + abs(farthestY - currentY)) / 10;
     Serial.print("Go back =======>");
     Serial.println(grids2goback);
-    if (grids2goback > 0) {
-        goAhead(grids2goback);
+    while (grids2goback > 0) {
+        goAhead(1);
+        grids2goback--;
     }
 
     if (farthestX < 0) {
@@ -316,7 +317,6 @@ void findWall() {
         }
         goAhead(1);
     }
-    straighten();
     straighten();
 
     turn(-1);
@@ -408,7 +408,7 @@ void goAhead(int grids) {
     attachInterrupt(1, countRight, RISING);
 
     md.init();
-    md.setSpeeds(400, 400);
+    md.setSpeeds(250, 250);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -503,7 +503,7 @@ void detachTimerInterrupt() {
 }
 ISR(TIMER1_COMPA_vect) {
     if (speedMode) {
-        md.setM2Speed((400 - delta*5) * direction);
+        md.setM2Speed((250 - delta*5) * direction);
     } else {
         md.setM2Speed((200 - delta*5) * direction);
     }
@@ -518,9 +518,9 @@ ISR(TIMER1_COMPA_vect) {
 
 void straighten() {
     adjustDistance();
-    delay(500);
+    delay(200);
     adjustDirection();
-    delay(500);
+    delay(200);
 }
 
 void adjustDirection() {
@@ -531,7 +531,7 @@ void adjustDirection() {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(10);
-        if (r > l) {
+        if (r > l + 20) { //TODO WARNING
             md.setSpeeds(-60, 60);
         } else if (r < l) {
             md.setSpeeds(60, -60);
@@ -549,9 +549,9 @@ void adjustDistance() {
         delay(10);
         frontDis = max(l, r);
         
-        if (frontDis < 500) {
+        if (frontDis < 450) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 550) {
+        } else if (frontDis > 500) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
