@@ -117,22 +117,25 @@ void loop() {
     currentX = 10;
     currentY = 7;
     pwd = 1;
-    //findWall();
+    findWall();
 
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
     goalY = 1;
     exploration();
     delay(1000);
+    arriving(0);
 
     goalX = 20;
     goalY = 15;
     exploration();
     delay(1000);
+    arriving(1);
 
     goalX = 1;
     goalY = 1;
     exploration();
+    arriving(0);
 
     waitForCommand();
     //getFRInstructions();
@@ -340,16 +343,35 @@ char getChar() {
     return Serial.read();
 }
 
-void arriving() {
+void arriving(int endPoint) {
     //TODO
     //when near the end point
     //do nice stop
-    straighten();
-    turn(1); // turn right
-    straighten();
-    turn(1);
-    turn(1);
+    if (!endPoint) {
+        if (pwd == 4) {
+            turn(-1); //face down/3
+        }
+        straighten();
+    
+        //now face 3
+        turn(1); // turn right
+        ++pwd;
+        straighten();
+        turn(1);
+        turn(1);
+    } else {
+        if (pwd == 2) {
+            turn(-1); //face up/1
+        }
+        straighten();
 
+        //now face up 1
+        turn(1); //turn right
+        ++pwd;
+        straighten();
+        turn(1);
+        turn(1);
+    }
     //face to
     //||
     //|| (1, 1)
@@ -380,13 +402,13 @@ void getFRInstructions() {
         if (grids != 0) {
             goAhead(grids);
             grids = 0;
-        } 
+        }
         if (instrChar == 'R') {
             turn(1);
         } else if (instrChar == 'L') {
             turn(-1);
         } else if (instrChar == 'G') {
-            arriving();
+            arriving(1);
         }
     }
 }
@@ -518,9 +540,9 @@ ISR(TIMER1_COMPA_vect) {
 
 void straighten() {
     adjustDistance();
-    delay(200);
+    delay(50);
     adjustDirection();
-    delay(200);
+    delay(50);
 }
 
 void adjustDirection() {
@@ -543,10 +565,10 @@ void adjustDirection() {
 void adjustDistance() {
     int speed = 100;
     int l, r, frontDis;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 500; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
-        delay(10);
+        delay(6);
         frontDis = max(l, r);
         
         if (frontDis < 450) {
