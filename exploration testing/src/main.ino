@@ -33,7 +33,7 @@
 //#define longIR_F_in A4
 /**********************/
 #define RisingEdgePerGrid 380 // need testing
-#define RisingEdgePerTurn_200 412 //for speed 200
+#define RisingEdgePerTurn_200 382 //for speed 200
 #define stepToStraighten 5 //every 5 step make a auto adjust
 
 
@@ -84,7 +84,28 @@ void waitForCommand() {
 }
 
 void setup() {
-    
+    // while (1) {
+    //     turn(1);
+    //     delay(500);
+    // }
+    // while (1) {
+    //     goAhead(7);
+    //     delay(500);
+    // }
+    // 
+    /*drifting
+    md.init();
+    while (1) {
+        md.setSpeeds(330, -100);
+        delay(2500);
+        md.setSpeeds(200, 200);
+        delay(2000);
+        md.setSpeeds(-100, 330);
+        delay(2500);
+        md.setSpeeds(200,200);
+        delay(2000);
+    }
+    */
     Serial.begin(9600);
     setPinsMode();
 
