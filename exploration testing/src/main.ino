@@ -133,12 +133,13 @@ void loop() {
     //     turn(1);
     //     delay(400);
     // }
-    waitForCommand();
+    
+    //waitForCommand();
 
     currentX = 10;
     currentY = 7;
     pwd = 1;
-    findWall();
+    //findWall();
 
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
