@@ -247,6 +247,27 @@ void exploration() {
     }
 }
 
+bool isGoodObstacle() {
+    if (ir_lf_dis < 300 || ir_rf_dis < 300) {
+        return false;
+    }
+    return able2Straighten();
+}
+
+bool able2Straighten() {
+    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 10);
+}
+
+int shortSensorToCM() {
+    //TODO
+    //add library here
+}
+
+int longSensorToCM() {
+    //TODO
+    //add library here
+}
+
 void findWall() {
     //find the closest obstacle
     //go and auto fix
