@@ -34,7 +34,7 @@
 /**********************/
 #define RisingEdgePerGrid 380 // need testing
 #define RisingEdgePerTurn_200 382 //for speed 200
-#define stepToStraighten 5 //every 5 step make a auto adjust
+#define stepToStraighten 3 //every 5 step make a auto adjust
 
 
 volatile int direction;
@@ -224,9 +224,12 @@ void exploration() {
             Serial.println("right no space");
             if (--counter_for_straighten == 0) {    //auto fix
                 turn(1);    //turn right
-                straighten();
+                if (able2Straighten()) {
+                    //TODO testing
+                    straighten();
+                }
                 turn(-1);   //turn left
-                counter_for_straighten = 5;
+                counter_for_straighten = 3;
             }
         }
 
@@ -289,6 +292,9 @@ void findWall() {
     for (int i = 1; i <= 4; ++i) {
         turn(1);
         sensorReading();
+        if (!isGoodObstacle()) {
+            continue;
+        }
         f_dis = min(ir_rf_dis, ir_lf_dis);
         if (tempDis < f_dis && f_dis - tempDis > 10) {
             //ignore small difference
