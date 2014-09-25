@@ -138,7 +138,7 @@ void loop() {
 
     currentX = 10;
     currentY = 7;
-    pwd = 1;
+    pwd = 1; //north
     //findWall();
 
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
@@ -493,11 +493,11 @@ void goAhead(int grids) {
     
     //update direciton
     switch (pwd) {
-        case 1: currentY +=grids;
+        case 1: currentY -=grids;
                 break;
         case 2: currentX +=grids;
                 break;
-        case 3: currentY -=grids;
+        case 3: currentY +=grids;
                 break;
         case 4: currentX -=grids;
                 break;
