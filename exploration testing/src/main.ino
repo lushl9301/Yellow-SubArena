@@ -32,10 +32,10 @@
 
 //#define longIR_F_in A4
 /**********************/
-#define RisingEdgePerGrid 380 // need testing
+#define RisingEdgePerGrid 290 // need testing
 #define RisingEdgePerTurn_200 382 //for speed 200
 #define stepToStraighten 3 //every 5 step make a auto adjust
-
+#define speedModeSpeed 300
 
 volatile int direction;
 volatile int delta;
@@ -89,8 +89,8 @@ void setup() {
     //     delay(500);
     // }
     // while (1) {
-    //     goAhead(7);
-    //     delay(500);
+    //      goAhead(1);
+    //      delay(100);
     // }
     // 
     /*drifting
@@ -190,6 +190,8 @@ void thinkForAWhile() {
     //think
     //send and delay
     Serial.println("==========================");
+    Serial.println("X" + String(currentX));
+    Serial.println("Y" + String(currentY));
     Serial.println("UF " + String(u_F_dis));
     Serial.println("IRLF " + String(ir_lf_dis));
     Serial.println("IRRF " + String(ir_rf_dis));
@@ -216,7 +218,8 @@ void exploration() {
             Serial.println("RRRRRRR");
             if (empty_space_R >= 2) {
                 turn(1);
-                empty_space_R = 0;
+                empty_space_R = -1;
+                counter_for_straighten = stepToStraighten;
                 continue;
             }
         } else {
@@ -224,12 +227,9 @@ void exploration() {
             Serial.println("right no space");
             if (--counter_for_straighten == 0) {    //auto fix
                 turn(1);    //turn right
-                if (able2Straighten()) {
-                    //TODO testing
-                    straighten();
-                }
+                straighten();
                 turn(-1);   //turn left
-                counter_for_straighten = 3;
+                counter_for_straighten = stepToStraighten;
             }
         }
 
@@ -237,6 +237,7 @@ void exploration() {
             Serial.println("shit in front");
             //straighten();
             turn(-1);   //turn left
+            counter_for_straighten = stepToStraighten;
             empty_space_R = 0;
             continue;
         }
@@ -245,7 +246,7 @@ void exploration() {
         //default go ahead
         //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
             //can go
-            goAhead(1);
+        goAhead(1);
         //}
     }
 }
@@ -258,15 +259,15 @@ bool isGoodObstacle() {
 }
 
 bool able2Straighten() {
-    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 10);
+    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 50);
 }
 
-int shortSensorToCM() {
+int shortSensorToCM(int ir_rf_dis) {
     //TODO
     //add library here
 }
 
-int longSensorToCM() {
+int longSensorToCM(int ir_l_dis) {
     //TODO
     //add library here
 }
@@ -287,38 +288,33 @@ void findWall() {
     int f_dis = min(ir_rf_dis, ir_lf_dis);
     
     int tempDis = f_dis;
-    int tempMin = 0;
+    int tempMin = 1;
     
-    for (int i = 1; i <= 4; ++i) {
+    for (int i = 2; i <= 4; ++i) {
         turn(1);
         sensorReading();
         if (!isGoodObstacle()) {
             continue;
         }
         f_dis = min(ir_rf_dis, ir_lf_dis);
-        if (tempDis < f_dis && f_dis - tempDis > 10) {
+        if (tempDis < f_dis && (f_dis - tempDis) > 10) {
             //ignore small difference
             tempMin = i;
             tempDis = f_dis;
         }
     }
-    
-    for (int i = tempMin; i > 0; --i) {
+    turn(1);
+    for (int i = 1; i < tempMin; ++i) {
         turn(1);
     }
 
     sensorReading();
     int farthestX = currentX;
     int farthestY = currentY;
-    int farthestDis = max(u_L_dis, u_R_dis);
+    int farthestDis = 3;
     Serial.println("Found neasest one");
 
     while (1) {
-        if (u_F_dis <= 6) {
-            break;
-        }
-        goAhead(1);
-        sensorReading();
         if (u_L_dis > farthestDis) {
             farthestDis = u_L_dis;
             farthestX = currentX;
@@ -329,6 +325,11 @@ void findWall() {
             farthestX = -currentX;
             farthestY = -currentY;
         }
+        if (u_F_dis <= 10) {
+            break;
+        }
+        goAhead(1);
+        sensorReading();
     }
 
     straighten();
@@ -344,7 +345,7 @@ void findWall() {
     turn(1);
     turn(1);
 
-    int grids2goback = (abs(farthestX - currentX) + abs(farthestY - currentY)) / 10;
+    int grids2goback = (abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)) / 10;
     Serial.print("Go back =======>");
     Serial.println(grids2goback);
     while (grids2goback > 0) {
@@ -354,9 +355,8 @@ void findWall() {
 
     if (farthestX < 0) {
         turn(-1); //on right. go back. turn left
-    } else {
+    } else {        
         turn(1);
-
     }
     Serial.println("I found the wall");
     //found where is the wall
@@ -369,6 +369,7 @@ void findWall() {
         }
         goAhead(1);
     }
+
     straighten();
 
     turn(-1);
@@ -479,7 +480,7 @@ void goAhead(int grids) {
     attachInterrupt(1, countRight, RISING);
 
     md.init();
-    md.setSpeeds(250, 250);
+    md.setSpeeds(speedModeSpeed, speedModeSpeed);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -574,7 +575,7 @@ void detachTimerInterrupt() {
 }
 ISR(TIMER1_COMPA_vect) {
     if (speedMode) {
-        md.setM2Speed((250 - delta*5) * direction);
+        md.setM2Speed((speedModeSpeed - delta*5) * direction);
     } else {
         md.setM2Speed((200 - delta*5) * direction);
     }
@@ -588,6 +589,9 @@ ISR(TIMER1_COMPA_vect) {
 
 
 void straighten() {
+    if (!isGoodObstacle()) {
+        return;
+    }
     adjustDistance();
     delay(50);
     adjustDirection();
@@ -601,7 +605,7 @@ void adjustDirection() {
     for (int i = 0; i < 800; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
-        delay(10);
+        delay(6);
         if (r > l + 20) { //TODO WARNING
             md.setSpeeds(-60, 60);
         } else if (r < l) {
@@ -614,7 +618,7 @@ void adjustDirection() {
 void adjustDistance() {
     int speed = 100;
     int l, r, frontDis;
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 700; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(6);
