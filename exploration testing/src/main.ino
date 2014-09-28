@@ -6,6 +6,10 @@
 #include "URM37.h"     // Ultrasonic
 #include "MotorShield.h"
 
+#include "JsonGenerator/JsonGenerator.h" //adding Json generator https://github.com/bblanchon/ArduinoJson
+
+using namespace ArduinoJson::Generator;
+
 //digital 0, 1 are not alow to use ==> serial port is using
 //digital 2, 3, 4, 7, 8, 9, 10, 13 are occuppied by motor shield & encoder
 //A0, A1, 6, 12 need to be kicked out before use
@@ -189,20 +193,42 @@ void sensorReading() {
 void thinkForAWhile() {
     //think
     //send and delay
-    Serial.println("==========================");
-    Serial.println("X" + String(currentX));
-    Serial.println("Y" + String(currentY));
-    Serial.println("UF " + String(u_F_dis));
-    Serial.println("IRLF " + String(ir_lf_dis));
-    Serial.println("IRRF " + String(ir_rf_dis));
-
-    Serial.println("UL " + String(u_L_dis));
-    Serial.println("IRL " + String(ir_l_dis));
+    //cancel delay
     
-    Serial.println("UR " + String(u_R_dis));
-    Serial.println("IRR " + String(ir_r_dis));
-    Serial.println("___________________________");
-    delay(200);
+    JsonObject<10> talk_Json;
+    talk_Json["X"] = currentX;
+    talk_Json["Y"] = currentY;
+    talk_Json["direction"] = pwd;
+
+    talk_Json["U_F"] = u_F_dis;
+    talk_Json["U_R"] = u_R_dis;
+    talk_Json["U_L"] = u_L_dis;
+
+    talk_Json["short_LF"] = ir_lf_dis;
+    talk_Json["short_RF"] = ir_rf_dis;
+
+    talk_Json["short_FR"] = ir_r_dis;
+
+    talk_Json["long_BL"] = ir_r_dis;
+    Serial.print(talk_Json);
+    Serial.println();
+
+    //root.prettyPrintTo(Serial);
+
+    // Serial.println("==========================");
+    // Serial.println("X" + String(currentX));
+    // Serial.println("Y" + String(currentY));
+    // Serial.println("UF " + String(u_F_dis));
+    // Serial.println("IRLF " + String(ir_lf_dis));
+    // Serial.println("IRRF " + String(ir_rf_dis));
+
+    // Serial.println("UL " + String(u_L_dis));
+    // Serial.println("IRL " + String(ir_l_dis));
+
+    // Serial.println("UR " + String(u_R_dis));
+    // Serial.println("IRR " + String(ir_r_dis));
+    // Serial.println("___________________________");
+
 }
 
 void exploration() {
@@ -233,7 +259,7 @@ void exploration() {
             }
         }
 
-        if (u_F_dis <= 6) {
+        if (u_F_dis <= 5) { //TODO at one edge of arena. strange things happened
             Serial.println("shit in front");
             //straighten();
             turn(-1);   //turn left
@@ -354,7 +380,7 @@ void findWall() {
     }
 
     if (farthestX < 0) {
-        turn(-1); //on right. go back. turn left
+        turn(-1); //was on the right. go back. turn left
     } else {        
         turn(1);
     }
