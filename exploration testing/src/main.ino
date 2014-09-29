@@ -143,7 +143,7 @@ void loop() {
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
-    //findWall();
+    findWall();
 
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
@@ -182,7 +182,7 @@ void sensorReading() {
     }
 
     ir_rf_dis = shortIR_RF.getDis();
-    ir_lf_dis = shortIR_LF.getDis();
+    ir_lf_dis = shortIR_LF.getDis() * 0.95;
 
     ir_r_dis = shortIR_R.getDis();
     ir_l_dis = longIR_L.getDis();
@@ -209,7 +209,7 @@ void thinkForAWhile() {
 
     talk_Json["short_FR"] = ir_r_dis;
 
-    talk_Json["long_BL"] = ir_r_dis;
+    talk_Json["long_BL"] = ir_l_dis;
     Serial.print(talk_Json);
     Serial.println();
 
@@ -278,14 +278,14 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
-    if (ir_lf_dis < 300 || ir_rf_dis < 300) {
+    if (ir_lf_dis < 400 || ir_rf_dis < 400) {
         return false;
     }
     return able2Straighten();
 }
 
 bool able2Straighten() {
-    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 50);
+    return (abs(ir_rf_dis - ir_lf_dis) < 50);
 }
 
 int shortSensorToCM(int ir_rf_dis) {
