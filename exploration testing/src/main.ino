@@ -423,44 +423,41 @@ void arriving(int endPoint) {
     //TODO
     //when near the end point
     //do nice stop
-    if (!endPoint) {
-        if (pwd == 4) {
+    if (endPoint) {
+        if (pwd == 3) {
             turn(-1); //face down/3
         }
         straighten();
     
         //now face 3
         turn(1); // turn right
-        ++pwd;
         straighten();
         turn(1);
-        turn(1);
     } else {
-        if (pwd == 2) {
+        if (pwd == 1) {
             turn(-1); //face up/1
         }
         straighten();
 
         //now face up 1
         turn(1); //turn right
-        ++pwd;
         straighten();
-        turn(1);
         turn(1);
     }
     //face to
-    //||
-    //|| (1, 1)
-    //|| o -> 2
     //==========
+    //|| o -> 2
+    //|| (1, 1)
+    //|| 
+
     //
     //OR
     //
-    //===========
-    //  4 <- o ||
-    // (20, 15)||
-    //         ||
     //
+    //         ||
+    // (20, 15)||
+    //  4 <- o ||
+    //===========
 
 }
 
