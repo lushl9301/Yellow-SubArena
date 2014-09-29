@@ -36,10 +36,12 @@ using namespace ArduinoJson::Generator;
 
 //#define longIR_F_in A4
 /**********************/
-#define RisingEdgePerGrid 280 // need testing
-#define RisingEdgePerTurn_200 395 //for speed 200 382
+#define RisingEdgePerGrid 273 // need testing
 #define stepToStraighten 3 //every 5 step make a auto adjust
 #define speedModeSpeed 300
+
+int RisingEdgePerTurn_200 = 395; //for speed 200 382
+
 
 volatile int direction;
 volatile int delta;
@@ -139,32 +141,60 @@ void loop() {
     // }
     
     //waitForCommand();
+    // while(1) {
+    //     straighten();
+    //     turn(-1);
+    //     straighten();
+    //     turn(-1);
+    //     goAhead(6);
+    //     turn(1);
+    //     turn(1);
+    //     goAhead(6);
+    //     delay(500);
+    // }
+    
 
+    // RisingEdgePerTurn_200 /= 2;
+    // RisingEdgePerTurn_200 -= 10;
+    // int i = 8;
+    // while (i--) {
+    //     turn(1);
+    //     delay(200);
+    // }
+    // RisingEdgePerTurn_200 = 395 * 4 + 35;
+    // i = 3;
+    // while (i--) {
+    //     turn(1);
+    //     delay(400);
+    // }
+
+    RisingEdgePerTurn_200 = 395;
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
-    //findWall();
+    findWall();
 
-    currentX = 20;
-    currentY = 7;
     pwd = 1;
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
     goalY = 1;
     exploration();
     Serial.println("I reach here");
-    delay(1000);
+    delay(3000);
     arriving(0);
 
+    turn(1);
     goalX = 20;
     goalY = 15;
     exploration();
-    delay(1000);
+    delay(3000);
     arriving(1);
 
+    turn(1);
     goalX = 1;
     goalY = 1;
     exploration();
+    delay(3000);
     arriving(0);
 
     waitForCommand();
@@ -176,13 +206,13 @@ void loop() {
 
 void sensorReading() {
     while ((u_F_dis = u_F.getDis()) == 0) {
-        delay(50);
+        delay(10);
     }
     while ((u_L_dis = u_L.getDis()) == 0) {
-        delay(50);
+        delay(10);
     }
     while ((u_R_dis = u_R.getDis()) == 0) {
-        delay(50);
+        delay(10);
     }
 
     ir_rf_dis = shortIR_RF.getDis();
@@ -293,7 +323,7 @@ bool able2Straighten() {
     if (ir_rf_dis > 500 && ir_lf_dis > 500) {
         return true;
     }
-    return (abs(ir_rf_dis - ir_lf_dis) < 3);
+    return (abs(ir_rf_dis - ir_lf_dis) < 100);
 }
 
 int shortSensorToCM(int ir_rf_dis) {
@@ -379,7 +409,7 @@ void findWall() {
     turn(1);
     turn(1);
 
-    int grids2goback = (abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)) / 10;
+    int grids2goback = abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)  ;
     Serial.print("Go back =======>");
     Serial.println(grids2goback);
     while (grids2goback > 0) {
@@ -535,7 +565,7 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    delay(3000);
+    delay(500);
 }
 
 void turn(int turnRight) {
@@ -568,7 +598,7 @@ void turn(int turnRight) {
     } else if (pwd == 0) {
         pwd = 4;
     }
-    delay(3000);
+    delay(500);
 }
 
 
@@ -634,10 +664,10 @@ void adjustDirection() {
     //Ultrasonic go until 5cm
     int speed = 60;
     int l, r;
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < 150; i++) {
         l = shortIR_LF.getDis() * 0.95;
         r = shortIR_RF.getDis();
-        delay(6);
+        delay(3);
         if (r > l) { //TODO WARNING
             md.setSpeeds(-60, 60);
         } else if (r < l) {
