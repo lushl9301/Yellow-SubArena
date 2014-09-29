@@ -290,8 +290,10 @@ bool isGoodObstacle() {
 }
 
 bool able2Straighten() {
-
-    return (abs(ir_rf_dis - ir_lf_dis) < 70);
+    if (ir_rf_dis > 500 && ir_lf_dis > 500) {
+        return true;
+    }
+    return (abs(ir_rf_dis - ir_lf_dis) < 3);
 }
 
 int shortSensorToCM(int ir_rf_dis) {
