@@ -36,8 +36,8 @@ using namespace ArduinoJson::Generator;
 
 //#define longIR_F_in A4
 /**********************/
-#define RisingEdgePerGrid 290 // need testing
-#define RisingEdgePerTurn_200 382 //for speed 200
+#define RisingEdgePerGrid 280 // need testing
+#define RisingEdgePerTurn_200 395 //for speed 200 382
 #define stepToStraighten 3 //every 5 step make a auto adjust
 #define speedModeSpeed 300
 
@@ -143,12 +143,16 @@ void loop() {
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
-    findWall();
+    //findWall();
 
+    currentX = 20;
+    currentY = 7;
+    pwd = 1;
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
     goalY = 1;
     exploration();
+    Serial.println("I reach here");
     delay(1000);
     arriving(0);
 
@@ -233,7 +237,7 @@ void thinkForAWhile() {
 
 void exploration() {
     empty_space_R = 0;
-    while (abs(goalX - currentX) >= 2 && abs(goalY - currentY) >= 2) {
+    while (abs(goalX - currentX) >= 2 || abs(goalY - currentY) >= 2) {
         //check right
         
         //get all sensor data here.
@@ -256,12 +260,13 @@ void exploration() {
                 straighten();
                 turn(-1);   //turn left
                 counter_for_straighten = stepToStraighten;
+                sensorReading();
             }
         }
 
-        if (u_F_dis <= 5) { //TODO at one edge of arena. strange things happened
+        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) { //TODO at one edge of arena. strange things happened
             Serial.println("shit in front");
-            //straighten();
+            straighten();
             turn(-1);   //turn left
             counter_for_straighten = stepToStraighten;
             empty_space_R = 0;
@@ -278,14 +283,15 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
-    if (ir_lf_dis < 400 || ir_rf_dis < 400) {
+    if (ir_lf_dis < 300 || ir_rf_dis < 300) {
         return false;
     }
     return able2Straighten();
 }
 
 bool able2Straighten() {
-    return (abs(ir_rf_dis - ir_lf_dis) < 50);
+
+    return (abs(ir_rf_dis - ir_lf_dis) < 70);
 }
 
 int shortSensorToCM(int ir_rf_dis) {
@@ -390,7 +396,7 @@ void findWall() {
     //go to the wall
     while (1) {
         sensorReading();
-        if (u_F_dis <= 6) {
+        if (u_F_dis <= 10) {
             break;
         }
         goAhead(1);
@@ -612,6 +618,7 @@ ISR(TIMER1_COMPA_vect) {
 
 
 void straighten() {
+    sensorReading();
     if (!isGoodObstacle()) {
         return;
     }
@@ -625,11 +632,11 @@ void adjustDirection() {
     //Ultrasonic go until 5cm
     int speed = 60;
     int l, r;
-    for (int i = 0; i < 800; i++) {
-        l = shortIR_LF.getDis();
+    for (int i = 0; i < 300; i++) {
+        l = shortIR_LF.getDis() * 0.95;
         r = shortIR_RF.getDis();
         delay(6);
-        if (r > l + 20) { //TODO WARNING
+        if (r > l) { //TODO WARNING
             md.setSpeeds(-60, 60);
         } else if (r < l) {
             md.setSpeeds(60, -60);
@@ -641,15 +648,15 @@ void adjustDirection() {
 void adjustDistance() {
     int speed = 100;
     int l, r, frontDis;
-    for (int i = 0; i < 700; i++) {
-        l = shortIR_LF.getDis();
+    for (int i = 0; i < 1000; i++) {
+        l = shortIR_LF.getDis() * 0.95;
         r = shortIR_RF.getDis();
-        delay(6);
+        delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 450) {
+        if (frontDis < 480) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 500) {
+        } else if (frontDis > 530) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
