@@ -258,7 +258,7 @@ void thinkForAWhile() {
     toRPi["type"] = "reading";
     toRPi["data"] = talk_Json;
 
-    Serial.print(toRPi);
+    Serial.println(toRPi);
 
     //root.prettyPrintTo(Serial);
 
@@ -442,7 +442,7 @@ void findWall() {
     turn(1);
 
     int grids2goback = abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)  ;
-    Serial.print("Go back =======>");
+    Serial.println("Go back =======>");
     Serial.println(grids2goback);
     while (grids2goback > 0) {
         goAhead(1);
