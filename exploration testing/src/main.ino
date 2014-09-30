@@ -79,10 +79,10 @@ void setPinsMode() {
 }
 
 void waitForCommand() {
-    /**/
+    /*
     delay(1000);
     return;
-    /**/
+    */
     while (!Serial.available() || Serial.read() != 'S') {
         ;
     }
@@ -140,7 +140,7 @@ void loop() {
     //     delay(400);
     // }
     
-    //waitForCommand();
+    waitForCommand();
     // while(1) {
     //     straighten();
     //     turn(-1);
@@ -197,11 +197,21 @@ void loop() {
     delay(3000);
     arriving(0);
 
+    JsonObject<2> toRPi1;
+    toRPi1["type"] = "status";
+    toRPi1["data"] = "END_EXP";
+    Serial.print(toRPi1);
+
     waitForCommand();
     //getFRInstructions();
     currentX = 1;
     currentY = 1;
     bridesheadRevisited();
+    JsonObject<2> toRPi2;
+    toRPi2["type"] = "status";
+    toRPi2["data"] = "END_PATH";
+    Serial.print(toRPi2);
+    waitForCommand();
 }
 
 void sensorReading() {
@@ -244,8 +254,11 @@ void thinkForAWhile() {
     talk_Json["short_FR"] = ir_r_dis;
 
     talk_Json["long_BL"] = ir_l_dis;
-    Serial.print(talk_Json);
-    Serial.println();
+    JsonObject<2> toRPi;
+    toRPi["type"] = "reading";
+    toRPi["data"] = talk_Json;
+
+    Serial.print(toRPi);
 
     //root.prettyPrintTo(Serial);
 
