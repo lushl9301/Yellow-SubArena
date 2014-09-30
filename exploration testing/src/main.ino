@@ -36,7 +36,7 @@ using namespace ArduinoJson::Generator;
 
 //#define longIR_F_in A4
 /**********************/
-#define RisingEdgePerGrid 273 // need testing
+#define RisingEdgePerGrid 269 // need testing
 #define stepToStraighten 3 //every 5 step make a auto adjust
 #define speedModeSpeed 300
 
@@ -267,17 +267,17 @@ void thinkForAWhile() {
 
 void exploration() {
     empty_space_R = 0;
+    int flag_turn_right_just_now = 0;
     while (abs(goalX - currentX) >= 2 || abs(goalY - currentY) >= 2) {
         //check right
         
         //get all sensor data here.
         sensorReading();
-
-        if (u_R_dis > 12) { //right got space
-            ++empty_space_R;
+        if (flag_turn_right_just_now >= 0 && u_R_dis > 12) { //right got space
             Serial.println("RRRRRRR");
-            if (empty_space_R >= 2) {
+            if (++empty_space_R >= 2) {
                 turn(1);
+                flag_turn_right_just_now = 1;
                 empty_space_R = -1;
                 counter_for_straighten = stepToStraighten;
                 continue;
@@ -298,8 +298,14 @@ void exploration() {
             Serial.println("shit in front");
             straighten();
             turn(-1);   //turn left
-            counter_for_straighten = stepToStraighten;
             empty_space_R = 0;
+            if (flag_turn_right_just_now == 1) {
+                empty_space_R = 1;
+                flag_turn_right_just_now = -1;
+            } else {
+                flag_turn_right_just_now = 0;
+            }
+            counter_for_straighten = stepToStraighten;
             continue;
         }
 
@@ -308,6 +314,7 @@ void exploration() {
         //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
             //can go
         goAhead(1);
+        flag_turn_right_just_now = 0;
         //}
     }
 }
@@ -329,11 +336,17 @@ bool able2Straighten() {
 int shortSensorToCM(int ir_rf_dis) {
     //TODO
     //add library here
+    int result = 6787 / (analogRead(ir_rf_dis) - 3) - 4;
+    Serial.println(result);
+    return result;
 }
 
 int longSensorToCM(int ir_l_dis) {
     //TODO
     //add library here
+    int result = 16667 / (analogRead(ir_l_dis) + 15) - 10;
+    Serial.println(result);
+    return result;
 }
 
 void findWall() {
@@ -349,7 +362,10 @@ void findWall() {
      */
     Serial.println("finding wall");
     sensorReading();
-    int f_dis = min(ir_rf_dis, ir_lf_dis);
+    int f_dis = min(shortSensorToCM(ir_rf_dis), shortSensorToCM(ir_lf_dis));
+    if (u_F_dis > f_dis) {
+        f_dis = u_F_dis;
+    }
     
     int tempDis = f_dis;
     int tempMin = 1;
@@ -360,8 +376,11 @@ void findWall() {
         // if (!isGoodObstacle()) {
         //     continue;
         // }
-        f_dis = min(ir_rf_dis, ir_lf_dis);
-        if (tempDis > f_dis) {
+        f_dis = min(shortSensorToCM(ir_rf_dis), shortSensorToCM(ir_lf_dis));
+        if (u_F_dis > f_dis) {
+            f_dis = u_F_dis;
+        }
+        if (tempDis < f_dis) {
             //ignore small difference
             tempMin = i;
             tempDis = f_dis;
@@ -389,7 +408,7 @@ void findWall() {
             farthestX = -currentX;
             farthestY = -currentY;
         }
-        if (u_F_dis <= 10) {
+        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
             break;
         }
         goAhead(1);
@@ -428,7 +447,7 @@ void findWall() {
     //go to the wall
     while (1) {
         sensorReading();
-        if (u_F_dis <= 10) {
+        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
             break;
         }
         goAhead(1);
