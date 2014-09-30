@@ -357,11 +357,11 @@ void findWall() {
     for (int i = 2; i <= 4; ++i) {
         turn(1);
         sensorReading();
-        if (!isGoodObstacle()) {
-            continue;
-        }
+        // if (!isGoodObstacle()) {
+        //     continue;
+        // }
         f_dis = min(ir_rf_dis, ir_lf_dis);
-        if (tempDis < f_dis && (f_dis - tempDis) > 10) {
+        if (tempDis > f_dis) {
             //ignore small difference
             tempMin = i;
             tempDis = f_dis;
