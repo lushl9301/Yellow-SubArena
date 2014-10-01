@@ -126,6 +126,7 @@ void loop() {
             break;
         case 'R':
             remote();
+            break;
         default:
             // error
             break;
@@ -214,13 +215,13 @@ void explorationFLow() {
 }
 
 void sensorReading() {
-    while ((u_F_dis = u_F.getDis()) == 0) {
+    while ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200) {
         delay(10);
     }
-    while ((u_L_dis = u_L.getDis()) == 0) {
+    while ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200) {
         delay(10);
     }
-    while ((u_R_dis = u_R.getDis()) == 0) {
+    while ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200) {
         delay(10);
     }
 
