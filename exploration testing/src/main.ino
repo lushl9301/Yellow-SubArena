@@ -128,6 +128,7 @@ void loop() {
             remote();
         default:
             // error
+            break;
     }
 }
 
@@ -206,10 +207,10 @@ void explorationFLow() {
     delay(3000);
     arriving(0);
 
-    JsonObject<2> toRPi1;
-    toRPi1["type"] = "status";
-    toRPi1["data"] = "END_EXP";
-    Serial.print(toRPi1);
+    JsonObject<2> toRPi;
+    toRPi["type"] = "status";
+    toRPi["data"] = "END_EXP";
+    Serial.print(toRPi);
 }
 
 void sensorReading() {
@@ -474,10 +475,38 @@ void bridesheadRevisited() {
     currentX = 1;
     currentY = 1;
     getFRInstructions();
-    JsonObject<2> toRPi2;
-    toRPi2["type"] = "status";
-    toRPi2["data"] = "END_PATH";
-    Serial.print(toRPi2);
+    JsonObject<2> toRPi;
+    toRPi["type"] = "status";
+    toRPi["data"] = "END_PATH";
+    Serial.print(toRPi);
+}
+
+void remote() {
+    char instrChar;
+    int grids;
+
+    while (1) {
+        while (isDigit(instrChar = getChar())) {
+            grids = instrChar - '0';
+        }
+        if (grids != 0) {
+            goAhead(grids);
+            grids = 0;
+        }
+        if (instrChar == 'R') {
+            turn(1);
+        } else if (instrChar == 'L') {
+            turn(-1);
+        } else if (instrChar == 'G') {
+            arriving(1);
+            break;
+        }
+    }
+
+    JsonObject<2> toRPi;
+    toRPi["type"] = "status";
+    toRPi["data"] = "END_RMT";
+    Serial.print(toRPi);
 }
 
 void arriving(int endPoint) {
