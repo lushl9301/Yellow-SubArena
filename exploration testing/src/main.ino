@@ -487,19 +487,15 @@ void remote() {
     int grids;
 
     while (1) {
-        while (isDigit(instrChar = getChar())) {
+        if (isDigit(instrChar = getChar())) {
             grids = instrChar - '0';
-        }
-        if (grids != 0) {
             goAhead(grids);
-            grids = 0;
         }
         if (instrChar == 'R') {
             turn(1);
         } else if (instrChar == 'L') {
             turn(-1);
         } else if (instrChar == 'G') {
-            arriving(1);
             break;
         }
     }
@@ -561,11 +557,12 @@ void getFRInstructions() {
     //then move
 
     char instrChar;
-    int grids;
+    int grids = 0;
     while (1) {
         
         while (isDigit(instrChar = getChar())) {
             grids = grids * 10 + instrChar - '0';
+            Serial.println(grids);
         }
         if (grids != 0) {
             goAhead(grids);
