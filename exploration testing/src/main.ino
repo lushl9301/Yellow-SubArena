@@ -90,19 +90,7 @@ void waitForCommand() {
 }
 
 void setup() {
-    /*drifting
-    md.init();
-    while (1) {
-        md.setSpeeds(330, -100);
-        delay(2500);
-        md.setSpeeds(200, 200);
-        delay(2000);
-        md.setSpeeds(-100, 330);
-        delay(2500);
-        md.setSpeeds(200,200);
-        delay(2000);
-    }
-    */
+
     Serial.begin(9600);
     setPinsMode();
 
@@ -126,12 +114,38 @@ void setup() {
 }
 
 void loop() {
-    // while (1) {
-    //     turn(1);
-    //     delay(400);
-    // }
     
     waitForCommand();
+
+    switch (getChar()) {
+        case 'E':
+            explorationFLow();
+            break;
+        case 'P':
+            bridesheadRevisited();
+            break;
+        case 'R':
+            remote();
+        default:
+            // error
+    }
+}
+
+void demo() {
+    /*drifting
+    md.init();
+    while (1) {
+        md.setSpeeds(330, -100);
+        delay(2500);
+        md.setSpeeds(200, 200);
+        delay(2000);
+        md.setSpeeds(-100, 330);
+        delay(2500);
+        md.setSpeeds(200,200);
+        delay(2000);
+    }
+    */
+   
 
     // int i = 4;
     // while(i) {
@@ -163,7 +177,9 @@ void loop() {
     //     turn(1);
     //     delay(400);
     // }
+}
 
+void explorationFLow() {
     RisingEdgePerTurn_200 = 390;
     currentX = 10;
     currentY = 7;
@@ -197,17 +213,6 @@ void loop() {
     toRPi1["type"] = "status";
     toRPi1["data"] = "END_EXP";
     Serial.print(toRPi1);
-
-    waitForCommand();
-    //getFRInstructions();
-    currentX = 1;
-    currentY = 1;
-    bridesheadRevisited();
-    JsonObject<2> toRPi2;
-    toRPi2["type"] = "status";
-    toRPi2["data"] = "END_PATH";
-    Serial.print(toRPi2);
-    waitForCommand();
 }
 
 void sensorReading() {
@@ -477,12 +482,13 @@ void bridesheadRevisited() {
     //turn(1); //right
     //turn(-1); //left
     //goAhead(l);
+    currentX = 1;
+    currentY = 1;
     getFRInstructions();
-}
-
-char getChar() {
-    while (!Serial.available());
-    return Serial.read();
+    JsonObject<2> toRPi2;
+    toRPi2["type"] = "status";
+    toRPi2["data"] = "END_PATH";
+    Serial.print(toRPi2);
 }
 
 void arriving(int endPoint) {
@@ -527,6 +533,11 @@ void arriving(int endPoint) {
 
 }
 
+char getChar() {
+    while (!Serial.available());
+    return Serial.read();
+}
+
 void getFRInstructions() {
     //get shortest path from RPi
     //then move
@@ -548,6 +559,7 @@ void getFRInstructions() {
             turn(-1);
         } else if (instrChar == 'G') {
             arriving(1);
+            break;
         }
     }
 }
