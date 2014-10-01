@@ -90,15 +90,6 @@ void waitForCommand() {
 }
 
 void setup() {
-    // while (1) {
-    //     turn(1);
-    //     delay(500);
-    // }
-    // while (1) {
-    //      goAhead(1);
-    //      delay(100);
-    // }
-    // 
     /*drifting
     md.init();
     while (1) {
@@ -141,22 +132,27 @@ void loop() {
     // }
     
     waitForCommand();
-    // while(1) {
-    //     straighten();
-    //     turn(-1);
-    //     straighten();
-    //     turn(-1);
-    //     goAhead(6);
+
+    // int i = 4;
+    // while(i) {
+    //     --i;
+    //     goAhead(10);
     //     turn(1);
     //     turn(1);
-    //     goAhead(6);
+    //     goAhead(10);
     //     delay(500);
     // }
-    
+    // delay(5000);
+    // Serial.println("Start");
+    // while (1) {
+    //     sensorReading();
+    //     delay(500);
+    // }
+    // delay(5000);
 
     // RisingEdgePerTurn_200 /= 2;
     // RisingEdgePerTurn_200 -= 10;
-    // int i = 8;
+    // i = 8;
     // while (i--) {
     //     turn(1);
     //     delay(200);
@@ -168,7 +164,7 @@ void loop() {
     //     delay(400);
     // }
 
-    RisingEdgePerTurn_200 = 395;
+    RisingEdgePerTurn_200 = 390;
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
@@ -308,7 +304,7 @@ void exploration() {
         }
 
         if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) { //TODO at one edge of arena. strange things happened
-            Serial.println("shit in front");
+            //Serial.println("shit in front");
             straighten();
             turn(-1);   //turn left
             empty_space_R = 0;
@@ -408,7 +404,7 @@ void findWall() {
     int farthestX = currentX;
     int farthestY = currentY;
     int farthestDis = 3;
-    Serial.println("Found neasest one");
+    Serial.println("Found nearest one");
 
     while (1) {
         if (u_L_dis > farthestDis) {
@@ -701,9 +697,9 @@ void adjustDirection() {
         r = shortIR_RF.getDis();
         delay(3);
         if (r > l) { //TODO WARNING
-            md.setSpeeds(-60, 60);
+            md.setSpeeds(-65, 65);
         } else if (r < l) {
-            md.setSpeeds(60, -60);
+            md.setSpeeds(65, -65);
         }
     }
     md.setBrakes(400, 400);
