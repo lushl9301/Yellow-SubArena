@@ -36,11 +36,11 @@ using namespace ArduinoJson::Generator;
 
 //#define longIR_F_in A4
 /**********************/
+
+#define RisingEdgePerTurn_200 395; //for speed 200 382
 #define RisingEdgePerGrid 269 // need testing
 #define stepToStraighten 3 //every 5 step make a auto adjust
 #define speedModeSpeed 300
-
-int RisingEdgePerTurn_200 = 395; //for speed 200 382
 
 
 volatile int direction;
@@ -145,8 +145,6 @@ void demo() {
         delay(2000);
     }
     */
-   
-
     // int i = 4;
     // while(i) {
     //     --i;
@@ -180,7 +178,6 @@ void demo() {
 }
 
 void explorationFLow() {
-    RisingEdgePerTurn_200 = 390;
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
@@ -308,8 +305,8 @@ void exploration() {
             }
         }
 
-        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) { //TODO at one edge of arena. strange things happened
-            //Serial.println("shit in front");
+        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
+            Serial.println("something in front");
             straighten();
             turn(-1);   //turn left
             empty_space_R = 0;
@@ -323,13 +320,11 @@ void exploration() {
             continue;
         }
 
-        //TODO testing
         //default go ahead
-        //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400) {
-            //can go
+        //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400)
+        //    then go
         goAhead(1);
         flag_turn_right_just_now = 0;
-        //}
     }
 }
 
@@ -348,30 +343,24 @@ bool able2Straighten() {
 }
 
 int shortSensorToCM(int ir_rf_dis) {
-    //TODO
-    //add library here
     int result = 6787 / (analogRead(ir_rf_dis) - 3) - 4;
-    Serial.println(result);
     return result;
 }
 
 int longSensorToCM(int ir_l_dis) {
-    //TODO
-    //add library here
     int result = 16667 / (analogRead(ir_l_dis) + 15) - 10;
-    Serial.println(result);
     return result;
 }
 
 void findWall() {
-    //find the closest obstacle
+    //find the furthest obstacle
     //go and auto fix
     //go back
     //find farthest obstacle according to the distance
     //go that way
   
     /*
-    HOWTO find closest obstacle
+    HOWTO find furthest obstacle
     360 turning. use sensor to see the distance
      */
     Serial.println("finding wall");
@@ -492,7 +481,6 @@ void bridesheadRevisited() {
 }
 
 void arriving(int endPoint) {
-    //TODO
     //when near the end point
     //do nice stop
     if (endPoint) {
@@ -707,11 +695,11 @@ void adjustDirection() {
     for (int i = 0; i < 150; i++) {
         l = shortIR_LF.getDis() * 0.95;
         r = shortIR_RF.getDis();
-        delay(3);
-        if (r > l) { //TODO WARNING
-            md.setSpeeds(-65, 65);
+        delay(2);
+        if (r > l) {
+            md.setSpeeds(-68, 68);
         } else if (r < l) {
-            md.setSpeeds(65, -65);
+            md.setSpeeds(68, -68);
         }
     }
     md.setBrakes(400, 400);
