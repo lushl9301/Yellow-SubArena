@@ -133,7 +133,7 @@ void loop() {
     // dailyTuning();
     // delay(1000);
     
-    explorationFLow();
+    //explorationFLow();
 
     waitForCommand();
 
