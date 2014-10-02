@@ -37,10 +37,11 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurn_200 395; //for speed 200 382
+#define RisingEdgePerTurn_200 388 //for speed 200 382
 #define RisingEdgePerGrid 269 // need testing
 #define stepToStraighten 3 //every 5 step make a auto adjust
 #define speedModeSpeed 300
+#define autoAlignmentSpeed 55
 
 
 volatile int direction;
@@ -113,8 +114,26 @@ void setup() {
     delay(10);
 }
 
+void dailyTuning() {
+    int i = 12;
+    delay(1000);
+    while (--i) {
+        straighten();
+        delay(1000);    
+    }
+
+    delay(1000);
+    while (--i) {
+        turn(1);
+        delay(200);
+    }
+}
+
 void loop() {
-    
+    //dailyTuning();
+    delay(1000);
+    explorationFLow();
+
     waitForCommand();
 
     switch (getChar()) {
@@ -183,7 +202,7 @@ void explorationFLow() {
     currentX = 10;
     currentY = 7;
     pwd = 1; //north
-    findWall();
+    while (!findWall());
 
     pwd = 1;
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
@@ -354,7 +373,7 @@ int longSensorToCM(int ir_l_dis) {
     return result;
 }
 
-void findWall() {
+bool findWall() {
     //find the furthest obstacle
     //go and auto fix
     //go back
@@ -465,6 +484,10 @@ void findWall() {
     //turn left
     //start stick2TheWall & turn right
     //job done
+    if (abs(currentX) < 2 || currentX > 19 || abs(currentY) < 2 || currentY > 14) {
+        return true;
+    }
+    return false;
 }
 
 void bridesheadRevisited() {
@@ -712,7 +735,7 @@ void straighten() {
     adjustDistance();
     delay(50);
     adjustDirection();
-    delay(50);
+    delay(300);
 }
 
 void adjustDirection() {
@@ -720,13 +743,13 @@ void adjustDirection() {
     int speed = 60;
     int l, r;
     for (int i = 0; i < 150; i++) {
-        l = shortIR_LF.getDis() * 0.95;
+        l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(2);
         if (r > l) {
-            md.setSpeeds(-68, 68);
+            md.setSpeeds(-autoAlignmentSpeed, autoAlignmentSpeed);
         } else if (r < l) {
-            md.setSpeeds(68, -68);
+            md.setSpeeds(autoAlignmentSpeed, -autoAlignmentSpeed);
         }
     }
     md.setBrakes(400, 400);
@@ -736,12 +759,12 @@ void adjustDistance() {
     int speed = 100;
     int l, r, frontDis;
     for (int i = 0; i < 1000; i++) {
-        l = shortIR_LF.getDis() * 0.95;
+        l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 480) {
+        if (frontDis < 520) {
             md.setSpeeds(speed, speed);
         } else if (frontDis > 530) {
             md.setSpeeds(-speed, -speed);
