@@ -130,8 +130,9 @@ void dailyTuning() {
 }
 
 void loop() {
-    //dailyTuning();
-    delay(1000);
+    // dailyTuning();
+    // delay(1000);
+    
     explorationFLow();
 
     waitForCommand();
@@ -200,7 +201,7 @@ void demo() {
 
 void explorationFLow() {
     currentX = 10;
-    currentY = 7;
+    currentY = 8;
     pwd = 1; //north
     while (!findWall());
 
@@ -300,7 +301,7 @@ void thinkForAWhile() {
 void exploration() {
     empty_space_R = 0;
     int flag_turn_right_just_now = 0;
-    while (abs(goalX - currentX) >= 2 || abs(goalY - currentY) >= 2) {
+    while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { //TODO
         //check right
         
         //get all sensor data here.
@@ -326,7 +327,7 @@ void exploration() {
             }
         }
 
-        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
+        if (u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400) {
             Serial.println("something in front");
             straighten();
             turn(-1);   //turn left
@@ -484,7 +485,7 @@ bool findWall() {
     //turn left
     //start stick2TheWall & turn right
     //job done
-    if (abs(currentX) < 2 || currentX > 19 || abs(currentY) < 2 || currentY > 14) {
+    if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
         return true;
     }
     return false;
@@ -643,7 +644,7 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    delay(500);
+    delay(100);
 }
 
 void turn(int turnRight) {
@@ -676,7 +677,7 @@ void turn(int turnRight) {
     } else if (pwd == 0) {
         pwd = 4;
     }
-    delay(500);
+    delay(100);
 }
 
 
@@ -735,17 +736,17 @@ void straighten() {
     adjustDistance();
     delay(50);
     adjustDirection();
-    delay(300);
+    delay(50);
 }
 
 void adjustDirection() {
     //Ultrasonic go until 5cm
     int speed = 60;
     int l, r;
-    for (int i = 0; i < 150; i++) {
-        l = shortIR_LF.getDis();
+    for (int i = 0; i < 120; i++) {
+        l = shortIR_LF.getDis() * 1.01;
         r = shortIR_RF.getDis();
-        delay(2);
+        delay(1);
         if (r > l) {
             md.setSpeeds(-autoAlignmentSpeed, autoAlignmentSpeed);
         } else if (r < l) {
@@ -764,9 +765,9 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 520) {
+        if (frontDis < 460) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 530) {
+        } else if (frontDis > 470) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
