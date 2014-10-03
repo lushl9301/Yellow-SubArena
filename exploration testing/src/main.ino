@@ -212,7 +212,6 @@ void explorationFLow() {
     goalY = 1;
     exploration();
     Serial.println("I reach START");
-    delay(3000);
     arriving(0);
 
     turn(1);
@@ -220,16 +219,13 @@ void explorationFLow() {
     goalY = 15;
     exploration();
     Serial.println("I reach GOAL");
-    delay(3000);
     arriving(1);
 
     turn(1);
     goalX = 1;
     goalY = 1;
     exploration();
-    delay(3000);
     arriving(0);
-
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_EXP";
@@ -382,6 +378,12 @@ int longSensorToCM(int ir_l_dis) {
     return result;
 }
 
+bool isWithWall() {
+    if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
+        return true;
+    }
+}
+
 bool findWall() {
     //find the furthest obstacle
     //go and auto fix
@@ -449,6 +451,10 @@ bool findWall() {
     }
 
     straighten();
+    if (isWithWall()) {
+        turn(-1);
+        return true;
+    }
     //auto fix
 
     /*
@@ -465,13 +471,14 @@ bool findWall() {
     Serial.println("Go back =======>");
     Serial.println(grids2goback);
     while (grids2goback > 0) {
+        sensorReading();
         goAhead(1);
         grids2goback--;
     }
 
     if (farthestX < 0) {
         turn(-1); //was on the right. go back. turn left
-    } else {        
+    } else {
         turn(1);
     }
     Serial.println("I found the wall");
@@ -493,7 +500,7 @@ bool findWall() {
     //turn left
     //start stick2TheWall & turn right
     //job done
-    if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
+    if (isWithWall()) {
         return true;
     }
     return false;
