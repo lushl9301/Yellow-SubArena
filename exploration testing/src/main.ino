@@ -38,8 +38,9 @@ using namespace ArduinoJson::Generator;
 /**********************/
 
 #define RisingEdgePerTurn_200 388 //for speed 200 382
-#define RisingEdgePerGrid 269 // need testing
-#define stepToStraighten 3 //every 5 step make a auto adjust
+#define RisingEdgePerGrid_300 269 // need testing
+#define RisingEdgePerGrid_400 290
+#define stepToStraighten 4 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
 #define autoAlignmentSpeed 55
 
@@ -115,13 +116,14 @@ void setup() {
 }
 
 void dailyTuning() {
-    int i = 12;
-    delay(1000);
-    while (--i) {
-        straighten();
-        delay(1000);    
-    }
+    // int i = 12;
+    // delay(1000);
+    // while (--i) {
+    //     straighten();
+    //     delay(1000);    
+    // }
 
+    int i = 12;
     delay(1000);
     while (--i) {
         turn(1);
@@ -130,7 +132,7 @@ void dailyTuning() {
 }
 
 void loop() {
-    // dailyTuning();
+    //dailyTuning();
     // delay(1000);
     
     //explorationFLow();
@@ -205,12 +207,11 @@ void explorationFLow() {
     pwd = 1; //north
     while (!findWall());
 
-    pwd = 1;
     counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
     goalX = 1;
     goalY = 1;
     exploration();
-    Serial.println("I reach here");
+    Serial.println("I reach START");
     delay(3000);
     arriving(0);
 
@@ -218,6 +219,7 @@ void explorationFLow() {
     goalX = 20;
     goalY = 15;
     exploration();
+    Serial.println("I reach GOAL");
     delay(3000);
     arriving(1);
 
@@ -235,18 +237,24 @@ void explorationFLow() {
 }
 
 void sensorReading() {
-    while ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200) {
-        delay(10);
+    
+    int i = 30;
+    while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
+        delay(2);
     }
-    while ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200) {
-        delay(10);
+
+    i = 30;
+    while (--i > 0 && ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200)) {
+        delay(2);
     }
-    while ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200) {
-        delay(10);
+    
+    i = 30;
+    while (--i > 0 && ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200)) {
+        delay(2);
     }
 
     ir_rf_dis = shortIR_RF.getDis();
-    ir_lf_dis = shortIR_LF.getDis() * 0.95;
+    ir_lf_dis = shortIR_LF.getDis();
 
     ir_r_dis = shortIR_R.getDis();
     ir_l_dis = longIR_L.getDis();
@@ -268,12 +276,12 @@ void thinkForAWhile() {
     talk_Json["U_R"] = u_R_dis;
     talk_Json["U_L"] = u_L_dis;
 
-    talk_Json["short_LF"] = ir_lf_dis;
-    talk_Json["short_RF"] = ir_rf_dis;
+    talk_Json["short_LF"] = shortSensorToCM(ir_lf_dis);
+    talk_Json["short_RF"] = shortSensorToCM(ir_rf_dis);
 
-    talk_Json["short_FR"] = ir_r_dis;
+    talk_Json["short_FR"] = shortSensorToCM(ir_r_dis);
 
-    talk_Json["long_BL"] = ir_l_dis;
+    talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
     JsonObject<2> toRPi;
     toRPi["type"] = "reading";
     toRPi["data"] = talk_Json;
@@ -301,7 +309,7 @@ void thinkForAWhile() {
 void exploration() {
     empty_space_R = 0;
     int flag_turn_right_just_now = 0;
-    while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { //TODO
+    while (abs(goalX - currentX) >= 2 || abs(goalY - currentY) >= 2) { //TODO
         //check right
         
         //get all sensor data here.
@@ -420,7 +428,7 @@ bool findWall() {
     int farthestX = currentX;
     int farthestY = currentY;
     int farthestDis = 3;
-    Serial.println("Found nearest one");
+    Serial.println("Found furthest one");
 
     while (1) {
         if (u_L_dis > farthestDis) {
@@ -614,7 +622,7 @@ void goAhead(int grids) {
     speedMode = 1;
     direction = 1;
     delta = 0;
-    rightMCtr = leftMCtr = RisingEdgePerGrid * grids;
+    rightMCtr = leftMCtr = RisingEdgePerGrid_300 * grids;
 
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
@@ -744,7 +752,7 @@ void adjustDirection() {
     int speed = 60;
     int l, r;
     for (int i = 0; i < 120; i++) {
-        l = shortIR_LF.getDis() * 1.01;
+        l = shortIR_LF.getDis() * 1.02; //3 Oct
         r = shortIR_RF.getDis();
         delay(1);
         if (r > l) {
@@ -765,9 +773,9 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 460) {
+        if (frontDis < 490) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 470) {
+        } else if (frontDis > 510) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
