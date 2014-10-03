@@ -141,11 +141,17 @@ void loop() {
 
     switch (getChar()) {
         case 'E':
+            // while(1){
+            //     currentX = 10;
+            //     currentY = 8;
+            //     sensorReading();
+            //     delay(500);
+            // }
             explorationFLow();
             break;
         case 'P':
             bridesheadRevisited();
-            break;
+            break;  
         case 'R':
             remote();
             break;
@@ -226,10 +232,11 @@ void explorationFLow() {
     goalY = 1;
     exploration();
     arriving(0);
+
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_EXP";
-    Serial.print(toRPi);
+    Serial.println(toRPi);
 }
 
 void sensorReading() {
@@ -368,13 +375,13 @@ bool able2Straighten() {
     return (abs(ir_rf_dis - ir_lf_dis) < 100);
 }
 
-int shortSensorToCM(int ir_rf_dis) {
-    int result = 6787 / (analogRead(ir_rf_dis) - 3) - 4;
+int shortSensorToCM(int ir_dis) {
+    int result = 6787 / (ir_dis - 3) - 4;
     return result;
 }
 
-int longSensorToCM(int ir_l_dis) {
-    int result = 16667 / (analogRead(ir_l_dis) + 15) - 10;
+int longSensorToCM(int ir_dis) {
+    int result = 16667 / (ir_dis + 15) - 10;
     return result;
 }
 
