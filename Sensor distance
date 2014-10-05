@@ -1,0 +1,18 @@
+1 long_BL => 18 | 17 18
+2 long_BL => 25 | 24 25 26 27
+3 long_BL => 36 | 34 - 39
+4 long_BL => 45 | 44 - 48
+5 long_BL => 55 | 53 - 56
+6 long_BL => 69 | 66 - 72 Not Clear
+
+1 short_LF => 9 | 8 9 10
+2 short_LF => 19 | 18 19
+3 short_LF => 28 - 32
+
+1 short_RF => 9 | 8 9 10
+2 short_RF => 18 | 18 19
+3 short_RF => 28 - 32
+
+1 short_FR => 9 | 8 9 10
+2 short_FR => 21 | 19 - 22
+3 short_FR => 32 - 40
