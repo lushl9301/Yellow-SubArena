@@ -766,7 +766,7 @@ void adjustDirection() {
     int speed = 60;
     int l, r;
     for (int i = 0; i < 120; i++) {
-        l = shortIR_LF.getDis() * 1.02; //3 Oct
+        l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(1);
         if (r > l) {
