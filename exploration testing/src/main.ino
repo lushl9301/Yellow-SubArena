@@ -136,17 +136,15 @@ void loop() {
     // delay(1000);
     
     //explorationFLow();
+    // while (1) {
+    //     sensorReading();
+    //     delay(150);
+    // }
 
     waitForCommand();
 
     switch (getChar()) {
         case 'E':
-            // while(1){
-            //     currentX = 10;
-            //     currentY = 8;
-            //     sensorReading();
-            //     delay(500);
-            // }
             explorationFLow();
             break;
         case 'P':
@@ -279,12 +277,19 @@ void thinkForAWhile() {
     talk_Json["U_R"] = u_R_dis;
     talk_Json["U_L"] = u_L_dis;
 
-    talk_Json["short_LF"] = shortSensorToCM(ir_lf_dis);
-    talk_Json["short_RF"] = shortSensorToCM(ir_rf_dis);
+    // 5 OCT SBS testing
+    // talk_Json["short_LF"] = shortSensorToCM2(ir_lf_dis);
+    // talk_Json["short_RF"] = shortSensorToCM2(ir_rf_dis);
+    // talk_Json["short_FR"] = shortSensorToCM2(ir_r_dis);
+    // talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
+    
+    talk_Json["short_LF"] = shortSensorToCM2(ir_lf_dis);
+    talk_Json["short_RF"] = shortSensorToCM2(ir_rf_dis);
 
-    talk_Json["short_FR"] = shortSensorToCM(ir_r_dis);
+    talk_Json["short_FR"] = shortSensorToCM2(ir_r_dis);
 
     talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
+    
     JsonObject<2> toRPi;
     toRPi["type"] = "reading";
     toRPi["data"] = talk_Json;
@@ -380,9 +385,19 @@ int shortSensorToCM(int ir_dis) {
     return result;
 }
 
+int shortSensorToCM2(int _raw) {
+    float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
+    return (int)(27.728*pow(voltFromRaw/1000, -1.2045));
+}
+
 int longSensorToCM(int ir_dis) {
     int result = 16667 / (ir_dis + 15) - 10;
     return result;
+}
+
+int longSensorToCM2(int _raw) {
+    float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
+    return (int)(61.573*pow(voltFromRaw/1000, -1.1068));
 }
 
 bool isWithWall() {
