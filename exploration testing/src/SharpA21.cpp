@@ -17,15 +17,16 @@ void SharpA21::init(int inputPin) {
 int SharpA21::getDis() {
     int _results[7], _temp;
     for (int k = 0; k < 7; k++) {
-        for (int i = 0; i < 5; i++) {
-            _inputs[_head] = analogRead(_inputPin);
-            --_head;
-            if (_head < 0) {
-                _head = 6;
-            }
-            _ds.windowFilter7(_inputs, _head);
-        }
-        _results[k] = _inputs[(_head + 1) % 7];
+        // for (int i = 0; i < 5; i++) {
+        //     _inputs[_head] = analogRead(_inputPin);
+        //     --_head;
+        //     if (_head < 0) {
+        //         _head = 6;
+        //     }
+        //     _ds.windowFilter7(_inputs, _head);
+        // }
+        //_results[k] = _inputs[(_head + 1) % 7];
+        _results[k] = analogRead(_inputPin);
     }
 
     for (int i = 0; i < 7; i++) {
@@ -38,4 +39,10 @@ int SharpA21::getDis() {
         }
     }
     return (_results[3]);
+}
+
+int SharpA21::getDisCM() {
+    int _raw = getDis();
+    float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
+    return (int)(27.728*pow(voltFromRaw/1000, -1.2045));
 }
