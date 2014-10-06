@@ -323,7 +323,6 @@ void exploration() {
         //get all sensor data here.
         sensorReading();
         if (flag_turn_right_just_now >= 0 && u_R_dis > 12) { //right got space
-            Serial.println("RRRRRRR");
             if (++empty_space_R >= 2) {
                 turn(1);
                 flag_turn_right_just_now = 1;
@@ -333,7 +332,6 @@ void exploration() {
             }
         } else {
             empty_space_R = 0;
-            Serial.println("right no space");
             if (--counter_for_straighten == 0) {    //auto fix
                 turn(1);    //turn right
                 straighten();
@@ -344,7 +342,7 @@ void exploration() {
         }
 
         if (u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400) {
-            Serial.println("something in front");
+            //Serial.println("something in front");
             straighten();
             turn(-1);   //turn left
             empty_space_R = 0;
@@ -380,10 +378,10 @@ bool able2Straighten() {
     return (abs(ir_rf_dis - ir_lf_dis) < 100);
 }
 
-int shortSensorToCM(int ir_dis) {
-    int result = 6787 / (ir_dis - 3) - 4;
-    return result;
-}
+// int shortSensorToCM(int ir_dis) {
+//     int result = 6787 / (ir_dis - 3) - 4;
+//     return result;
+// }
 
 int shortSensorToCM2(int _raw) {
     float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
@@ -395,10 +393,10 @@ int longSensorToCM(int ir_dis) {
     return result;
 }
 
-int longSensorToCM2(int _raw) {
-    float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
-    return (int)(61.573*pow(voltFromRaw/1000, -1.1068));
-}
+// int longSensorToCM2(int _raw) {
+//     float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
+//     return (int)(61.573*pow(voltFromRaw/1000, -1.1068));
+// }
 
 bool isWithWall() {
     if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
@@ -417,7 +415,7 @@ bool findWall() {
     HOWTO find furthest obstacle
     360 turning. use sensor to see the distance
      */
-    Serial.println("finding wall");
+    // Serial.println("finding wall");
     sensorReading();
     int f_dis = min(shortSensorToCM(ir_rf_dis), shortSensorToCM(ir_lf_dis));
     if (u_F_dis > f_dis) {
@@ -430,9 +428,6 @@ bool findWall() {
     for (int i = 2; i <= 4; ++i) {
         turn(1);
         sensorReading();
-        // if (!isGoodObstacle()) {
-        //     continue;
-        // }
         f_dis = min(shortSensorToCM(ir_rf_dis), shortSensorToCM(ir_lf_dis));
         if (u_F_dis > f_dis) {
             f_dis = u_F_dis;
@@ -452,7 +447,7 @@ bool findWall() {
     int farthestX = currentX;
     int farthestY = currentY;
     int farthestDis = 3;
-    Serial.println("Found furthest one");
+    // Serial.println("Found furthest one");
 
     while (1) {
         if (u_L_dis > farthestDis) {
@@ -490,7 +485,7 @@ bool findWall() {
     turn(1);
 
     int grids2goback = abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)  ;
-    Serial.println("Go back =======>");
+    //Serial.println("Go back =======>");
     Serial.println(grids2goback);
     while (grids2goback > 0) {
         sensorReading();
@@ -503,7 +498,7 @@ bool findWall() {
     } else {
         turn(1);
     }
-    Serial.println("I found the wall");
+    //Serial.println("I found the wall");
     //found where is the wall
     
     //go to the wall
@@ -518,7 +513,6 @@ bool findWall() {
     straighten();
 
     turn(-1);
-    Serial.println("im with the wall now========================");
     //turn left
     //start stick2TheWall & turn right
     //job done
