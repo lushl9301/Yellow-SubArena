@@ -37,8 +37,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurn_200 388 //for speed 200 382
-#define RisingEdgePerGrid_300 269 // need testing
+#define RisingEdgePerTurn_200 396 //for speed 200 382
+#define RisingEdgePerGrid_300 266 // need testing
 #define RisingEdgePerGrid_400 290
 #define stepToStraighten 4 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
@@ -283,10 +283,10 @@ void thinkForAWhile() {
     // talk_Json["short_FR"] = shortSensorToCM2(ir_r_dis);
     // talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
     
-    talk_Json["short_LF"] = shortSensorToCM2(ir_lf_dis);
-    talk_Json["short_RF"] = shortSensorToCM2(ir_rf_dis);
+    talk_Json["short_LF"] = shortSensorToCM(ir_lf_dis);
+    talk_Json["short_RF"] = shortSensorToCM(ir_rf_dis);
 
-    talk_Json["short_FR"] = shortSensorToCM2(ir_r_dis);
+    talk_Json["short_FR"] = shortSensorToCM(ir_r_dis);
 
     talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
     
@@ -378,15 +378,15 @@ bool able2Straighten() {
     return (abs(ir_rf_dis - ir_lf_dis) < 100);
 }
 
-// int shortSensorToCM(int ir_dis) {
-//     int result = 6787 / (ir_dis - 3) - 4;
-//     return result;
-// }
-
-int shortSensorToCM2(int _raw) {
-    float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
-    return (int)(27.728*pow(voltFromRaw/1000, -1.2045));
+int shortSensorToCM(int ir_dis) {
+    int result = 6787 / (ir_dis - 3) - 4;
+    return result;
 }
+
+// int shortSensorToCM2(int _raw) {
+//     float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
+//     return (int)(27.728*pow(voltFromRaw/1000, -1.2045));
+// }
 
 int longSensorToCM(int ir_dis) {
     int result = 16667 / (ir_dis + 15) - 10;
@@ -699,7 +699,7 @@ void turn(int turnRight) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    md.brakeWithABS();
+    md.setBrakes(400, 400);
     
     //update direction
     pwd += turnRight;
@@ -796,13 +796,13 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 490) {
+        if (frontDis < 510) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 510) {
+        } else if (frontDis > 520) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
         }
     }
     md.setBrakes(400, 400);
-}
+    }
