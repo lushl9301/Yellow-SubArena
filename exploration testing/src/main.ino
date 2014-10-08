@@ -37,10 +37,10 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurn_200 396 //for speed 200 382
+#define RisingEdgePerTurn_200 388 //for speed 200 382
 #define RisingEdgePerGrid_300 266 // need testing
 #define RisingEdgePerGrid_400 290
-#define stepToStraighten 4 //every 3 step make a auto adjust 3 OCT
+#define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
 #define autoAlignmentSpeed 55
 
@@ -133,7 +133,7 @@ void dailyTuning() {
 
 void loop() {
     //dailyTuning();
-    // delay(1000);
+    //delay(1000);
     
     //explorationFLow();
     // while (1) {
@@ -238,6 +238,8 @@ void explorationFLow() {
 }
 
 void sensorReading() {
+    //TODO only for testing
+    delay(500);
     
     int i = 30;
     while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
