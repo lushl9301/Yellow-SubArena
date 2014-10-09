@@ -37,8 +37,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurn_200 388 //for speed 200 382
-#define RisingEdgePerGrid_300 266 // need testing
+#define RisingEdgePerTurn_200 385 //for speed 200 382
+#define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
@@ -116,14 +116,16 @@ void setup() {
 }
 
 void dailyTuning() {
-    // int i = 12;
-    // delay(1000);
-    // while (--i) {
-    //     straighten();
-    //     delay(1000);    
-    // }
+    int i;
+    
+    i = 6;
+    delay(1000);
+    while (--i) {
+         straighten();
+         delay(1000);    
+    }
 
-    int i = 12;
+    i = 12;
     delay(1000);
     while (--i) {
         turn(1);
@@ -131,7 +133,23 @@ void dailyTuning() {
     }
 }
 
+void sptuning() {
+
+    // turn(-1);
+    // straighten();
+    // turn(-1);
+    // straighten();
+    // turn(1);
+    // turn(1);
+    int grids = 10;
+    while (grids-- != 0) {
+        goAhead(1);
+        delay(400);
+    }
+}
+
 void loop() {
+    //sptuning();
     //dailyTuning();
     //delay(1000);
     
@@ -613,25 +631,38 @@ void getFRInstructions() {
     //get shortest path from RPi
     //then move
 
+    turn(-1);
+    straighten();
+    turn(1);
+
     char instrChar;
     int grids = 0;
+    int auto_alignment_counter = 5;
     while (1) {
         
         while (isDigit(instrChar = getChar())) {
             grids = grids * 10 + instrChar - '0';
             Serial.println(grids);
         }
-        if (grids != 0) {
-            goAhead(grids);
-            grids = 0;
+        while (grids-- != 0) {
+            if (--auto_alignment_counter == 0) {
+                turn(-1);
+                straighten();
+                turn(1);
+                auto_alignment_counter = 4;
+            }
+            goAhead(1);
         }
+        grids = 0;
         if (instrChar == 'R') {
+            straighten();
             turn(1);
         } else if (instrChar == 'L') {
+            straighten();
             turn(-1);
         } else if (instrChar == 'G') {
             arriving(1);
-            break;
+            return;
         }
     }
 }
@@ -663,7 +694,7 @@ void goAhead(int grids) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    md.brakeWithABS();
+    md.setBrakes(400, 370);
     
     //update direciton
     switch (pwd) {
@@ -701,7 +732,7 @@ void turn(int turnRight) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    md.setBrakes(400, 400);
+    md.setBrakes(400, 370);
     
     //update direction
     pwd += turnRight;
@@ -748,9 +779,9 @@ void detachTimerInterrupt() {
 }
 ISR(TIMER1_COMPA_vect) {
     if (speedMode) {
-        md.setM2Speed((speedModeSpeed - delta*5) * direction);
+        md.setM2Speed((speedModeSpeed - delta) * direction);
     } else {
-        md.setM2Speed((200 - delta*5) * direction);
+        md.setM2Speed((200 - delta) * direction);
     }
 }
 
@@ -769,14 +800,14 @@ void straighten() {
     adjustDistance();
     delay(50);
     adjustDirection();
-    delay(50);
+    delay(300);
 }
 
 void adjustDirection() {
     //Ultrasonic go until 5cm
     int speed = 60;
     int l, r;
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 200; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(1);
@@ -786,7 +817,7 @@ void adjustDirection() {
             md.setSpeeds(autoAlignmentSpeed, -autoAlignmentSpeed);
         }
     }
-    md.setBrakes(400, 400);
+    md.setBrakes(400, 370);
 }
 
 void adjustDistance() {
@@ -798,13 +829,13 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 510) {
+        if (frontDis < 500) {
             md.setSpeeds(speed, speed);
-        } else if (frontDis > 520) {
+        } else if (frontDis > 510) {
             md.setSpeeds(-speed, -speed);
         } else {
             break;
         }
     }
-    md.setBrakes(400, 400);
-    }
+    md.setBrakes(400, 370);
+}
