@@ -37,7 +37,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurn_200 385 //for speed 200 382
+#define RisingEdgePerTurnRight_200 386 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 395
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
@@ -118,17 +119,24 @@ void setup() {
 void dailyTuning() {
     int i;
     
-    i = 6;
-    delay(1000);
-    while (--i) {
-         straighten();
-         delay(1000);    
-    }
+    // i = 6;
+    // delay(1000);
+    // while (--i) {
+    //      straighten();
+    //      delay(1000);    
+    // }
 
-    i = 12;
+    // i = 12;
+    // delay(1000);
+    // while (--i) {
+    //     turn(1);
+    //     delay(200);
+    // }
+
     delay(1000);
+    i = 12;
     while (--i) {
-        turn(1);
+        turn(-1);
         delay(200);
     }
 }
@@ -235,6 +243,8 @@ void explorationFLow() {
     exploration();
     Serial.println("I reach START");
     arriving(0);
+    currentX = 2;
+    currentY = 2;
 
     turn(1);
     goalX = 20;
@@ -242,6 +252,8 @@ void explorationFLow() {
     exploration();
     Serial.println("I reach GOAL");
     arriving(1);
+    currentX = 19;
+    currentY = 14;
 
     turn(1);
     goalX = 1;
@@ -337,9 +349,8 @@ void thinkForAWhile() {
 void exploration() {
     empty_space_R = 0;
     int flag_turn_right_just_now = 0;
-    while (abs(goalX - currentX) >= 2 || abs(goalY - currentY) >= 2) { //TODO
         //check right
-        
+    while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { 
         //get all sensor data here.
         sensorReading();
         if (flag_turn_right_just_now >= 0 && u_R_dis > 12) { //right got space
@@ -392,7 +403,7 @@ bool isGoodObstacle() {
 }
 
 bool able2Straighten() {
-    if (ir_rf_dis > 500 && ir_lf_dis > 500) {
+    if (ir_rf_dis > 400 && ir_lf_dis > 400) {
         return true;
     }
     return (abs(ir_rf_dis - ir_lf_dis) < 100);
@@ -586,6 +597,7 @@ void arriving(int endPoint) {
     //do nice stop
     if (endPoint) {
         if (pwd == 3) {
+            straighten();
             turn(-1); //face down/3
         }
         straighten();
@@ -596,6 +608,7 @@ void arriving(int endPoint) {
         turn(1);
     } else {
         if (pwd == 1) {
+            straighten();
             turn(-1); //face up/1
         }
         straighten();
@@ -694,17 +707,30 @@ void goAhead(int grids) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    md.setBrakes(400, 370);
+    brake();
     
     //update direciton
     switch (pwd) {
         case 1: currentY -=grids;
+
+                if (currentY < 2) {
+                    currentY = 2;
+                }
                 break;
         case 2: currentX +=grids;
+                if (currentX > 19) {
+                    currentX = 19;
+                }
                 break;
         case 3: currentY +=grids;
+                if (currentY > 14) {
+                    currentY = 14;
+                }
                 break;
         case 4: currentX -=grids;
+                if (currentX < 2) {
+                    currentX = 2;
+                }
                 break;
         default: break;
     }
@@ -715,7 +741,11 @@ void turn(int turnRight) {
     speedMode = 0;
     direction = turnRight;
     delta = 0;
-    rightMCtr = leftMCtr = RisingEdgePerTurn_200;
+    if (turnRight == 1) {
+        rightMCtr = leftMCtr = RisingEdgePerTurnRight_200;
+    } else {
+        rightMCtr = leftMCtr = RisingEdgePerTurnLeft_200;
+    }
 
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
@@ -732,7 +762,7 @@ void turn(int turnRight) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    md.setBrakes(400, 370);
+    brake();
     
     //update direction
     pwd += turnRight;
@@ -800,7 +830,7 @@ void straighten() {
     adjustDistance();
     delay(50);
     adjustDirection();
-    delay(300);
+    delay(100);
 }
 
 void adjustDirection() {
@@ -817,7 +847,7 @@ void adjustDirection() {
             md.setSpeeds(autoAlignmentSpeed, -autoAlignmentSpeed);
         }
     }
-    md.setBrakes(400, 370);
+    brake();
 }
 
 void adjustDistance() {
@@ -837,5 +867,11 @@ void adjustDistance() {
             break;
         }
     }
-    md.setBrakes(400, 370);
+    brake();
+}
+
+void brake() {
+    for (int i = 3; i > 0; i--) {
+        md.setBrakes(400, 400);
+    }
 }
