@@ -89,7 +89,7 @@ void waitForCommand() {
     while (!Serial.available() || Serial.read() != 'S') {
         ;
     }
-    delay(10);
+    delay(100);
 }
 
 void setup() {
@@ -99,21 +99,18 @@ void setup() {
 
     //set up motor
     md.init();
-    delay(10);
-    
+
     //set up 3 Ultrasonic
     u_F.init(urPWM_F, urTRIG);
     u_L.init(urPWM_L, urTRIG);
     u_R.init(urPWM_R, urTRIG);
-    delay(10);
-    
+
     //set up IR sensor
     shortIR_RF.init(shortIR_RF_in);
     shortIR_LF.init(shortIR_LF_in);
 
     shortIR_R.init(shortIR_R_in);
     longIR_L.init(longIR_L_in);
-    delay(10);
 }
 
 void dailyTuning() {
@@ -126,8 +123,8 @@ void dailyTuning() {
     //      delay(1000);    
     // }
 
-    // i = 12;
     // delay(1000);
+    // i = 12;
     // while (--i) {
     //     turn(1);
     //     delay(200);
@@ -170,15 +167,26 @@ void loop() {
     waitForCommand();
 
     switch (getChar()) {
-        case 'E':
+        case 'E': {
             explorationFLow();
             break;
-        case 'P':
-            bridesheadRevisited();
-            break;  
-        case 'R':
+        }
+        case 'P': {
+            turn(1);
+            goalX = 20;
+            goalY = 15;
+            exploration();
+            JsonObject<2> toRPi_t;
+            toRPi_t["type"] = "status";
+            toRPi_t["data"] = "END_PATH";
+            Serial.println(toRPi_t);
+            //bridesheadRevisited();
+            break; 
+        }
+        case 'R': {
             remote();
             break;
+        }
         default:
             // error
             break;
@@ -271,17 +279,17 @@ void sensorReading() {
     //TODO only for testing
     delay(500);
     
-    int i = 30;
+    int i = 10;
     while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
         delay(2);
     }
 
-    i = 30;
+    i = 10;
     while (--i > 0 && ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200)) {
         delay(2);
     }
     
-    i = 30;
+    i = 10;
     while (--i > 0 && ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200)) {
         delay(2);
     }
@@ -349,7 +357,7 @@ void thinkForAWhile() {
 void exploration() {
     empty_space_R = 0;
     int flag_turn_right_just_now = 0;
-        //check right
+    
     while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { 
         //get all sensor data here.
         sensorReading();
@@ -396,7 +404,7 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
-    if (ir_lf_dis < 300 || ir_rf_dis < 300) {
+    if (ir_lf_dis < 280 || ir_rf_dis < 280) {
         return false;
     }
     return able2Straighten();
@@ -406,7 +414,7 @@ bool able2Straighten() {
     if (ir_rf_dis > 400 && ir_lf_dis > 400) {
         return true;
     }
-    return (abs(ir_rf_dis - ir_lf_dis) < 100);
+    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 6);
 }
 
 int shortSensorToCM(int ir_dis) {
@@ -565,7 +573,7 @@ void bridesheadRevisited() {
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_PATH";
-    Serial.print(toRPi);
+    Serial.println(toRPi);
 }
 
 void remote() {
@@ -837,7 +845,7 @@ void adjustDirection() {
     //Ultrasonic go until 5cm
     int speed = 60;
     int l, r;
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < 300; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(1);
@@ -853,7 +861,7 @@ void adjustDirection() {
 void adjustDistance() {
     int speed = 100;
     int l, r, frontDis;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 1200; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(7);

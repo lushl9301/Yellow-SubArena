@@ -39,7 +39,7 @@ int SharpA21::getDis() {
 //         }
 //     }
 //     return (_results[3]);
-        int a, b;
+        int a;
         analogRead(_inputPin);
         analogRead(_inputPin);
         a = analogRead(_inputPin);
