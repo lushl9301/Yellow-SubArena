@@ -21,7 +21,7 @@ using namespace ArduinoJson::Generator;
 #define urTRIG A3 //use one to write command
 
 #define urPWM_F 12
-#define urPWM_L A2
+#define urPWM_L 6
 #define urPWM_R 5
 
 #define motor_L 13  // encoder
@@ -33,12 +33,13 @@ using namespace ArduinoJson::Generator;
 
 #define longIR_L_in A1
 #define shortIR_R_in A0
+#define shortIR_L_in A2
 
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 386 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 395
+#define RisingEdgePerTurnRight_200 389 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 391
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
@@ -64,11 +65,11 @@ int currentX, currentY;
 int goalX, goalY;
 
 URM37 u_F, u_L, u_R;
-SharpA21 shortIR_LF, shortIR_RF, shortIR_R;
+SharpA21 shortIR_LF, shortIR_RF, shortIR_R, shortIR_L;
 SharpA02 longIR_L;
 
 int u_F_dis, u_R_dis, u_L_dis;
-int ir_rf_dis, ir_lf_dis, ir_l_dis, ir_r_dis;
+int ir_rf_dis, ir_lf_dis, ir_l_dis, ir_r_dis, ir_l2_dis;
 
 MotorShield md;
 
@@ -110,25 +111,26 @@ void setup() {
     shortIR_LF.init(shortIR_LF_in);
 
     shortIR_R.init(shortIR_R_in);
+    shortIR_L.init(shortIR_L_in);
     longIR_L.init(longIR_L_in);
 }
 
 void dailyTuning() {
     int i;
     
-    // i = 6;
-    // delay(1000);
-    // while (--i) {
-    //      straighten();
-    //      delay(1000);    
-    // }
+    i = 4;
+    delay(1000);
+    while (--i) {
+         straighten();
+         delay(1000);    
+    }
 
-    // delay(1000);
-    // i = 12;
-    // while (--i) {
-    //     turn(1);
-    //     delay(200);
-    // }
+    delay(1000);
+    i = 12;
+    while (--i) {
+        turn(1);
+        delay(200);
+    }
 
     delay(1000);
     i = 12;
@@ -136,6 +138,7 @@ void dailyTuning() {
         turn(-1);
         delay(200);
     }
+
 }
 
 void sptuning() {
@@ -146,23 +149,23 @@ void sptuning() {
     // straighten();
     // turn(1);
     // turn(1);
-    int grids = 10;
+    int grids = 18;
     while (grids-- != 0) {
         goAhead(1);
-        delay(400);
+        delay(1000);
     }
 }
 
 void loop() {
-    //sptuning();
+    sptuning();
     //dailyTuning();
     //delay(1000);
     
     //explorationFLow();
-    // while (1) {
-    //     sensorReading();
-    //     delay(150);
-    // }
+    while (1) {
+        sensorReading();
+        delay(150);
+    }
 
     waitForCommand();
 
@@ -172,15 +175,15 @@ void loop() {
             break;
         }
         case 'P': {
-            turn(1);
-            goalX = 20;
-            goalY = 15;
-            exploration();
-            JsonObject<2> toRPi_t;
-            toRPi_t["type"] = "status";
-            toRPi_t["data"] = "END_PATH";
-            Serial.println(toRPi_t);
-            //bridesheadRevisited();
+            // turn(1);
+            // goalX = 20;
+            // goalY = 15;
+            // exploration();
+            // JsonObject<2> toRPi_t;
+            // toRPi_t["type"] = "status";
+            // toRPi_t["data"] = "END_PATH";
+            // Serial.println(toRPi_t);
+            bridesheadRevisited();
             break; 
         }
         case 'R': {
@@ -240,6 +243,16 @@ void demo() {
 }
 
 void explorationFLow() {
+
+    // currentX = 2;
+    // currentY = 2;
+    // sensorReading();
+    // JsonObject<2> toRPi1;
+    // toRPi1["type"] = "status";
+    // toRPi1["data"] = "END_EXP";
+    // Serial.println(toRPi1);
+    // return;
+
     currentX = 10;
     currentY = 8;
     pwd = 1; //north
@@ -299,6 +312,7 @@ void sensorReading() {
 
     ir_r_dis = shortIR_R.getDis();
     ir_l_dis = longIR_L.getDis();
+    ir_l2_dis = shortIR_L.getDis();
 
     thinkForAWhile();
 }
@@ -308,7 +322,7 @@ void thinkForAWhile() {
     //send and delay
     //cancel delay
     
-    JsonObject<10> talk_Json;
+    JsonObject<11> talk_Json;
     talk_Json["X"] = currentX;
     talk_Json["Y"] = currentY;
     talk_Json["direction"] = pwd;
@@ -327,7 +341,7 @@ void thinkForAWhile() {
     talk_Json["short_RF"] = shortSensorToCM(ir_rf_dis);
 
     talk_Json["short_FR"] = shortSensorToCM(ir_r_dis);
-
+    talk_Json["short_FL"] = shortSensorToCM(ir_l2_dis);
     talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
     
     JsonObject<2> toRPi;
@@ -404,6 +418,8 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
+    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
+
     if (ir_lf_dis < 280 || ir_rf_dis < 280) {
         return false;
     }
@@ -414,7 +430,6 @@ bool able2Straighten() {
     if (ir_rf_dis > 400 && ir_lf_dis > 400) {
         return true;
     }
-    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) < 6);
 }
 
 int shortSensorToCM(int ir_dis) {
@@ -879,7 +894,15 @@ void adjustDistance() {
 }
 
 void brake() {
+    // digitalWrite(2, LOW);
+    // digitalWrite(7, LOW);
+    // digitalWrite(4, LOW);
+    // digitalWrite(8, LOW);
+    // digitalWrite(9, 255);
+    // digitalWrite(10, 255);
+
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(400, 400);
+        md.setBrakes(385, 400);
+    //     md.setBrakes(300, 300);
     }
 }
