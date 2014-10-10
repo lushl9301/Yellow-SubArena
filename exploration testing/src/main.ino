@@ -418,19 +418,19 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
-    return (abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
+    return ((shortSensorToCM(ir_rf_dis) < 26) && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
 
-    if (ir_lf_dis < 280 || ir_rf_dis < 280) {
-        return false;
-    }
-    return able2Straighten();
+    // if (ir_lf_dis < 280 || ir_rf_dis < 280) {
+    //     return false;
+    // }
+    // return able2Straighten();
 }
 
-bool able2Straighten() {
-    if (ir_rf_dis > 400 && ir_lf_dis > 400) {
-        return true;
-    }
-}
+// bool able2Straighten() {
+//     if (ir_rf_dis > 400 && ir_lf_dis > 400) {
+//         return true;
+//     }
+// }
 
 int shortSensorToCM(int ir_dis) {
     int result = 6787 / (ir_dis - 3) - 4;
