@@ -96,6 +96,7 @@ void waitForCommand() {
 void setup() {
 
     Serial.begin(9600);
+    Serial.println("CLEAR");
     setPinsMode();
 
     //set up motor
@@ -162,10 +163,9 @@ void loop() {
     //delay(1000);
     
     //explorationFLow();
-    while (1) {
-        sensorReading();
-        delay(150);
-    }
+    // while (1) {
+    //     sensorReading();
+    // }
 
     waitForCommand();
 
@@ -289,30 +289,29 @@ void explorationFLow() {
 }
 
 void sensorReading() {
-    //TODO only for testing
-    delay(500);
-    
-    int i = 10;
-    while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
-        delay(2);
-    }
+    int i;
 
-    i = 10;
-    while (--i > 0 && ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200)) {
-        delay(2);
-    }
-    
-    i = 10;
-    while (--i > 0 && ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200)) {
+    i = 5;
+    while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
         delay(2);
     }
 
     ir_rf_dis = shortIR_RF.getDis();
     ir_lf_dis = shortIR_LF.getDis();
+    
+    i = 5;
+    while (--i > 0 && ((u_L_dis = u_L.getDis()) == 0 || u_L_dis > 200)) {
+        delay(2);
+    }
 
     ir_r_dis = shortIR_R.getDis();
     ir_l_dis = longIR_L.getDis();
     ir_l2_dis = shortIR_L.getDis();
+
+    i = 5;
+    while (--i > 0 && ((u_R_dis = u_R.getDis()) == 0 || u_R_dis > 200)) {
+        delay(2);
+    }
 
     thinkForAWhile();
 }
