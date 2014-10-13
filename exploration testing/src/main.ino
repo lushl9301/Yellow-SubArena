@@ -365,7 +365,7 @@ void exploration() {
             }
         }
 
-        if (u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400) {
+        if (obstacleInFront()) {
             //Serial.println("something in front");
             straighten();
             turn(-1);   //turn left
@@ -389,17 +389,18 @@ void exploration() {
 }
 
 bool isGoodObstacle() {
-    return ((shortSensorToCM(ir_rf_dis) < 26) && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
+    return((shortSensorToCM(ir_rf_dis) < 26)
+           && shortSensorToCM(ir_lf_dis) < 26)
+           && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
 }
 
 bool isWithWall() {
-    if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
-        return true;
-    }
+    return(abs(currentX) <= 2 || currentX >= 19
+           || abs(currentY) <= 2 || currentY >= 14);
 }
 
 bool obstacleInFront() {
-    
+    return(u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400);
 }
 
 bool findWall() {
@@ -457,7 +458,7 @@ bool findWall() {
             farthestX = -currentX;
             farthestY = -currentY;
         }
-        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
+        if (obstacleInFront()) {
             break;
         }
         goAhead(1);
@@ -501,7 +502,7 @@ bool findWall() {
     //go to the wall
     while (1) {
         sensorReading();
-        if (u_F_dis <= 10 || ir_lf_dis > 400 || ir_rf_dis > 400) {
+        if (obstacleInFront()) {
             break;
         }
         goAhead(1);
