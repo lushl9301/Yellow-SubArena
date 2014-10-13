@@ -388,21 +388,6 @@ void exploration() {
     }
 }
 
-bool isGoodObstacle() {
-    return((shortSensorToCM(ir_rf_dis) < 26)
-           && shortSensorToCM(ir_lf_dis) < 26)
-           && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
-}
-
-bool isWithWall() {
-    return(abs(currentX) <= 2 || currentX >= 19
-           || abs(currentY) <= 2 || currentY >= 14);
-}
-
-bool obstacleInFront() {
-    return(u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400);
-}
-
 bool findWall() {
     //find the furthest obstacle
     //go and auto fix
@@ -600,10 +585,7 @@ void arriving(int endPoint) {
 
 }
 
-char getChar() {
-    while (!Serial.available());
-    return Serial.read();
-}
+
 
 void getFRInstructions() {
     //get shortest path from RPi
@@ -839,8 +821,33 @@ void adjustDistance() {
     brake();
 }
 
-void brake() {
 
+/**************************************************************/
+/*********************Functional Function**********************/
+/**************************************************************/
+
+
+bool isGoodObstacle() {
+    return((shortSensorToCM(ir_rf_dis) < 26)
+           && shortSensorToCM(ir_lf_dis) < 26
+           && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
+}
+
+bool isWithWall() {
+    return(abs(currentX) <= 2 || currentX >= 19
+           || abs(currentY) <= 2 || currentY >= 14);
+}
+
+bool obstacleInFront() {
+    return(u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400);
+}
+
+char getChar() {
+    while (!Serial.available());
+    return Serial.read();
+}
+
+void brake() {
     for (int i = 3; i > 0; i--) {
         md.setBrakes(391, 400);
         //motor not start at the same time
