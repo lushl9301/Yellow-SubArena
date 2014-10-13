@@ -48,6 +48,9 @@ using namespace ArduinoJson::Generator;
 #define adjustDirectionSpeed 55
 #define adjustDistanceSpeed 100
 
+#define shortSensorToCM(ir_dis) (6787 / (ir_dis - 3) - 4)
+#define longSensorToCM(ir_dis) (16667 / (ir_dis + 15) - 10)
+
 
 volatile int direction;
 volatile int delta;
@@ -389,20 +392,14 @@ bool isGoodObstacle() {
     return ((shortSensorToCM(ir_rf_dis) < 26) && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
 }
 
-int shortSensorToCM(int ir_dis) {
-    int result = 6787 / (ir_dis - 3) - 4;
-    return result;
-}
-
-int longSensorToCM(int ir_dis) {
-    int result = 16667 / (ir_dis + 15) - 10;
-    return result;
-}
-
 bool isWithWall() {
     if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
         return true;
     }
+}
+
+bool obstacleInFront() {
+    
 }
 
 bool findWall() {
