@@ -42,6 +42,7 @@ using namespace ArduinoJson::Generator;
 #define RisingEdgePerTurnLeft_200 391
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
+#define RisingEdgeForSP 296
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
 #define autoAlignmentSpeed 55
@@ -51,6 +52,8 @@ volatile int direction;
 volatile int delta;
 volatile int rightMCtr, leftMCtr;
 volatile int speedMode;  //1 for fast(400), 0 for slow(200)
+
+volatile int grids;
 
 volatile int counter_for_straighten;
 volatile int empty_space_R;
@@ -158,7 +161,7 @@ void sptuning() {
 }
 
 void loop() {
-    sptuning();
+    //sptuning();
     //dailyTuning();
     //delay(1000);
     
@@ -183,6 +186,7 @@ void loop() {
             // toRPi_t["type"] = "status";
             // toRPi_t["data"] = "END_PATH";
             // Serial.println(toRPi_t);
+            Serial.println("START Shortest Path");
             bridesheadRevisited();
             break; 
         }
@@ -670,25 +674,26 @@ void getFRInstructions() {
     straighten();
     turn(1);
 
-    char instrChar;
-    int grids = 0;
+    int instrChar;
+    grids = 0;
     int auto_alignment_counter = 5;
     while (1) {
-        
+        grids = 0;
         while (isDigit(instrChar = getChar())) {
-            grids = grids * 10 + instrChar - '0';
+            grids = grids * 10 + (char)instrChar - '0';
             Serial.println(grids);
         }
-        while (grids-- != 0) {
-            if (--auto_alignment_counter == 0) {
-                turn(-1);
-                straighten();
-                turn(1);
-                auto_alignment_counter = 4;
-            }
-            goAhead(1);
+        //while (grids-- != 0) {
+            // if (--auto_alignment_counter == 0) {
+            //     turn(-1);
+            //     straighten();
+            //     turn(1);
+            //     auto_alignment_counter = 4;
+            // }
+            // goAhead(1);
+        if (grids != 0) {
+            goAhead(grids);
         }
-        grids = 0;
         if (instrChar == 'R') {
             straighten();
             turn(1);
@@ -713,7 +718,11 @@ void goAhead(int grids) {
     speedMode = 1;
     direction = 1;
     delta = 0;
-    rightMCtr = leftMCtr = RisingEdgePerGrid_300 * grids;
+    if (grids == 1) {
+        rightMCtr = leftMCtr = RisingEdgePerGrid_300;
+    } else {
+        rightMCtr = leftMCtr = RisingEdgeForSP * grids;
+    }    
 
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
@@ -901,7 +910,7 @@ void brake() {
     // digitalWrite(10, 255);
 
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(385, 400);
+        md.setBrakes(391, 400);
     //     md.setBrakes(300, 300);
     }
 }
