@@ -45,7 +45,8 @@ using namespace ArduinoJson::Generator;
 #define RisingEdgeForSP 296
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
-#define autoAlignmentSpeed 55
+#define adjustDirectionSpeed 55
+#define adjustDistanceSpeed 100
 
 
 volatile int direction;
@@ -86,10 +87,6 @@ void setPinsMode() {
 }
 
 void waitForCommand() {
-    /*
-    delay(1000);
-    return;
-    */
     while (!Serial.available() || Serial.read() != 'S') {
         ;
     }
@@ -165,7 +162,7 @@ void loop() {
     //dailyTuning();
     //delay(1000);
     
-    //explorationFLow();
+    // explorationFLow();
     // while (1) {
     //     sensorReading();
     // }
@@ -248,15 +245,6 @@ void demo() {
 
 void explorationFLow() {
 
-    // currentX = 2;
-    // currentY = 2;
-    // sensorReading();
-    // JsonObject<2> toRPi1;
-    // toRPi1["type"] = "status";
-    // toRPi1["data"] = "END_EXP";
-    // Serial.println(toRPi1);
-    // return;
-
     currentX = 10;
     currentY = 8;
     pwd = 1; //north
@@ -293,6 +281,7 @@ void explorationFLow() {
 }
 
 void sensorReading() {
+
     int i;
 
     i = 5;
@@ -322,8 +311,7 @@ void sensorReading() {
 
 void thinkForAWhile() {
     //think
-    //send and delay
-    //cancel delay
+    //send
     
     JsonObject<11> talk_Json;
     talk_Json["X"] = currentX;
@@ -334,12 +322,6 @@ void thinkForAWhile() {
     talk_Json["U_R"] = u_R_dis;
     talk_Json["U_L"] = u_L_dis;
 
-    // 5 OCT SBS testing
-    // talk_Json["short_LF"] = shortSensorToCM2(ir_lf_dis);
-    // talk_Json["short_RF"] = shortSensorToCM2(ir_rf_dis);
-    // talk_Json["short_FR"] = shortSensorToCM2(ir_r_dis);
-    // talk_Json["long_BL"] = longSensorToCM(ir_l_dis);
-    
     talk_Json["short_LF"] = shortSensorToCM(ir_lf_dis);
     talk_Json["short_RF"] = shortSensorToCM(ir_rf_dis);
 
@@ -352,23 +334,6 @@ void thinkForAWhile() {
     toRPi["data"] = talk_Json;
 
     Serial.println(toRPi);
-
-    //root.prettyPrintTo(Serial);
-
-    // Serial.println("==========================");
-    // Serial.println("X" + String(currentX));
-    // Serial.println("Y" + String(currentY));
-    // Serial.println("UF " + String(u_F_dis));
-    // Serial.println("IRLF " + String(ir_lf_dis));
-    // Serial.println("IRRF " + String(ir_rf_dis));
-
-    // Serial.println("UL " + String(u_L_dis));
-    // Serial.println("IRL " + String(ir_l_dis));
-
-    // Serial.println("UR " + String(u_R_dis));
-    // Serial.println("IRR " + String(ir_r_dis));
-    // Serial.println("___________________________");
-
 }
 
 void exploration() {
@@ -422,38 +387,17 @@ void exploration() {
 
 bool isGoodObstacle() {
     return ((shortSensorToCM(ir_rf_dis) < 26) && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
-
-    // if (ir_lf_dis < 280 || ir_rf_dis < 280) {
-    //     return false;
-    // }
-    // return able2Straighten();
 }
-
-// bool able2Straighten() {
-//     if (ir_rf_dis > 400 && ir_lf_dis > 400) {
-//         return true;
-//     }
-// }
 
 int shortSensorToCM(int ir_dis) {
     int result = 6787 / (ir_dis - 3) - 4;
     return result;
 }
 
-// int shortSensorToCM2(int _raw) {
-//     float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
-//     return (int)(27.728*pow(voltFromRaw/1000, -1.2045));
-// }
-
 int longSensorToCM(int ir_dis) {
     int result = 16667 / (ir_dis + 15) - 10;
     return result;
 }
-
-// int longSensorToCM2(int _raw) {
-//     float voltFromRaw=map(_raw, 0, 1023, 0, 5000);
-//     return (int)(61.573*pow(voltFromRaw/1000, -1.1068));
-// }
 
 bool isWithWall() {
     if (abs(currentX) <= 2 || currentX >= 19 || abs(currentY) <= 2 || currentY >= 14) {
@@ -490,7 +434,6 @@ bool findWall() {
             f_dis = u_F_dis;
         }
         if (tempDis < f_dis) {
-            //ignore small difference
             tempMin = i;
             tempDis = f_dis;
         }
@@ -525,11 +468,11 @@ bool findWall() {
     }
 
     straighten();
+    //auto fix
     if (isWithWall()) {
         turn(-1);
         return true;
     }
-    //auto fix
 
     /*
     HOWTO find fasest obstacle
@@ -581,13 +524,11 @@ bool findWall() {
 
 void bridesheadRevisited() {
     //follow instruction
-    //
-    //turn(1); //right
-    //turn(-1); //left
-    //goAhead(l);
-    currentX = 1;
-    currentY = 1;
+
+    currentX = 2;
+    currentY = 2;
     getFRInstructions();
+
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_PATH";
@@ -865,24 +806,23 @@ void straighten() {
 }
 
 void adjustDirection() {
-    //Ultrasonic go until 5cm
-    int speed = 60;
+    //IR sensor make robot shake
     int l, r;
     for (int i = 0; i < 300; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
         delay(1);
         if (r > l) {
-            md.setSpeeds(-autoAlignmentSpeed, autoAlignmentSpeed);
+            md.setSpeeds(-adjustDirectionSpeed, adjustDirectionSpeed);
         } else if (r < l) {
-            md.setSpeeds(autoAlignmentSpeed, -autoAlignmentSpeed);
+            md.setSpeeds(adjustDirectionSpeed, -adjustDirectionSpeed);
         }
     }
     brake();
 }
 
 void adjustDistance() {
-    int speed = 100;
+    //IR sensor correct position
     int l, r, frontDis;
     for (int i = 0; i < 1200; i++) {
         l = shortIR_LF.getDis();
@@ -890,10 +830,10 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 500) {
-            md.setSpeeds(speed, speed);
-        } else if (frontDis > 510) {
-            md.setSpeeds(-speed, -speed);
+        if (frontDis < 510) {
+            md.setSpeeds(adjustDistanceSpeed, adjustDistanceSpeed);
+        } else if (frontDis > 515) {
+            md.setSpeeds(-adjustDistanceSpeed, -adjustDistanceSpeed);
         } else {
             break;
         }
@@ -902,15 +842,12 @@ void adjustDistance() {
 }
 
 void brake() {
-    // digitalWrite(2, LOW);
-    // digitalWrite(7, LOW);
-    // digitalWrite(4, LOW);
-    // digitalWrite(8, LOW);
-    // digitalWrite(9, 255);
-    // digitalWrite(10, 255);
 
     for (int i = 3; i > 0; i--) {
         md.setBrakes(391, 400);
-    //     md.setBrakes(300, 300);
+        //motor not start at the same time
+        //not stop at the same time
+        //make right motor skip a bit
+        //to be same as left motor
     }
 }
