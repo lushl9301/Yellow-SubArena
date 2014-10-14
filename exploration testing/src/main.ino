@@ -45,7 +45,7 @@ using namespace ArduinoJson::Generator;
 #define RisingEdgeForSP 296
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
-#define adjustDirectionSpeed 55
+#define adjustDirectionSpeed 58
 #define adjustDistanceSpeed 100
 
 #define shortSensorToCM(ir_dis) (6787 / (ir_dis - 3) - 4)
@@ -254,14 +254,7 @@ void demo() {
     // }
 }
 
-void explorationFLow() {
-
-    currentX = 10;
-    currentY = 8;
-    pwd = 1; //north
-    while (!findWall());
-
-    counter_for_straighten = stepToStraighten; //every 3 or 5 step do a straighten
+void goToStart() {
     goalX = 1;
     goalY = 1;
     exploration();
@@ -269,8 +262,9 @@ void explorationFLow() {
     arriving(0);
     currentX = 2;
     currentY = 2;
+}
 
-    turn(1);
+void goToGoal() {
     goalX = 20;
     goalY = 15;
     exploration();
@@ -278,12 +272,58 @@ void explorationFLow() {
     arriving(1);
     currentX = 19;
     currentY = 14;
+}
 
-    turn(1);
-    goalX = 1;
-    goalY = 1;
-    exploration();
-    arriving(0);
+void explorationFLow() {
+
+    currentX = 10;
+    currentY = 8;
+    pwd = 1; //north
+    while (!findWall());
+
+
+    //START Exploration flow
+    counter_for_straighten = stepToStraighten;
+    //every 3 or 5 step do a straighten
+
+    //CASE #1
+    //West Wall
+    
+    if (currentX <= 3) {
+        goToGoal();
+        goToStart();
+        goto FinishExploration;
+    }
+
+    //CASE #2
+    //South Wall
+    if (currentY >= 18) {
+        goToGoal();
+        goToStart();
+        goto FinishExploration;
+    }
+
+    //CASE #3
+    //East Wall
+    if (currentX >= 13) {
+        goToStart();
+        turn(1);
+        goToGoal();
+        goToStart();
+        goto FinishExploration;
+    }
+
+    //CASE #4
+    //North Wall
+    if (currentY <= 3) {
+        goToStart();
+        turn(1);
+        goToGoal();
+        goToStart();
+        goto FinishExploration;
+    }
+
+    FinishExploration:
 
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
@@ -564,6 +604,7 @@ void arriving(int endPoint) {
         turn(1); // turn right
         straighten();
         turn(1);
+        turn(1);
     } else {
         if (pwd == 1) {
             straighten();
@@ -585,11 +626,11 @@ void arriving(int endPoint) {
     //
     //OR
     //
-    //
-    //         ||
-    // (20, 15)||
-    //  4 <- o ||
-    //===========
+    //        1 ||
+    //        ^ ||
+    //        | ||
+    //(20, 15)o ||
+    //============
 
 }
 
@@ -820,9 +861,9 @@ void adjustDistance() {
         delay(7);
         frontDis = max(l, r);
         
-        if (frontDis < 510) {
+        if (frontDis < 505) {
             md.setSpeeds(adjustDistanceSpeed, adjustDistanceSpeed);
-        } else if (frontDis > 515) {
+        } else if (frontDis > 510) {
             md.setSpeeds(-adjustDistanceSpeed, -adjustDistanceSpeed);
         } else {
             break;
