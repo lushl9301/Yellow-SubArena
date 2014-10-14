@@ -38,8 +38,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 389 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 391
+#define RisingEdgePerTurnRight_200 391 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 393
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
@@ -122,22 +122,22 @@ void setup() {
 void dailyTuning() {
     int i;
     
-    i = 4;
-    delay(1000);
-    while (--i) {
-         straighten();
-         delay(1000);    
-    }
+    // i = 10;
+    // delay(1000);
+    // while (--i) {
+    //      straighten();
+    //      delay(1000);    
+    // }
 
     delay(1000);
-    i = 12;
+    i = 13;
     while (--i) {
         turn(1);
         delay(200);
     }
 
     delay(1000);
-    i = 12;
+    i = 13;
     while (--i) {
         turn(-1);
         delay(200);
@@ -153,19 +153,27 @@ void sptuning() {
     // straighten();
     // turn(1);
     // turn(1);
-    int grids = 18;
+    int grids = 17;
     while (grids-- != 0) {
         goAhead(1);
         delay(1000);
     }
 }
 
+void turnAndGoTuning() {
+    while (1) {
+        turn(-1);
+        goAhead(1);
+    }
+}
+
 void loop() {
     //sptuning();
     //dailyTuning();
+    //turnAndGoTuning();
     //delay(1000);
     
-    // explorationFLow();
+    //explorationFLow();
     // while (1) {
     //     sensorReading();
     // }
@@ -649,7 +657,9 @@ void goAhead(int grids) {
     attachInterrupt(1, countRight, RISING);
 
     md.init();
-    md.setSpeeds(speedModeSpeed, speedModeSpeed);
+    md.setM2Speed(speedModeSpeed);
+    delay(4);
+    md.setM1Speed(speedModeSpeed);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -659,7 +669,7 @@ void goAhead(int grids) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    brake();
+    brakeForGoAhead();
     
     //update direciton
     switch (pwd) {
@@ -714,7 +724,7 @@ void turn(int turnRight) {
     detachTimerInterrupt();
     detachInterrupt(1);
 
-    brake();
+    brakeForRotation();
     
     //update direction
     pwd += turnRight;
@@ -798,7 +808,7 @@ void adjustDirection() {
             md.setSpeeds(adjustDirectionSpeed, -adjustDirectionSpeed);
         }
     }
-    brake();
+    brakeForRotation();
 }
 
 void adjustDistance() {
@@ -818,7 +828,7 @@ void adjustDistance() {
             break;
         }
     }
-    brake();
+    brakeForRotation();
 }
 
 
@@ -847,12 +857,18 @@ char getChar() {
     return Serial.read();
 }
 
-void brake() {
+void brakeForGoAhead() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(391, 400);
+        md.setBrakes(374, 400);
         //motor not start at the same time
         //not stop at the same time
         //make right motor skip a bit
         //to be same as left motor
+    }
+}
+
+void brakeForRotation() {
+    for (int i = 3; i > 0; i--) {
+        md.setBrakes(400, 400);
     }
 }
