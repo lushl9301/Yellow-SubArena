@@ -648,22 +648,16 @@ void getFRInstructions() {
     grids = 0;
     int auto_alignment_counter = 5;
     while (1) {
+        
         grids = 0;
         while (isDigit(instrChar = getChar())) {
             grids = grids * 10 + (char)instrChar - '0';
             Serial.println(grids);
         }
-        //while (grids-- != 0) {
-            // if (--auto_alignment_counter == 0) {
-            //     turn(-1);
-            //     straighten();
-            //     turn(1);
-            //     auto_alignment_counter = 4;
-            // }
-            // goAhead(1);
         if (grids != 0) {
             goAhead(grids);
         }
+
         if (instrChar == 'R') {
             straighten();
             turn(1);
