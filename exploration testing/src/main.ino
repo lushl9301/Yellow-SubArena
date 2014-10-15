@@ -208,7 +208,48 @@ void loop() {
     }
 }
 
+
+void drift(int right, int left) {
+    speedMode = 1;
+    direction = 1;
+    delta = 0;
+    // if (grids == 1) {
+    //     rightMCtr = leftMCtr = RisingEdgePerGrid_300;
+    // } else {
+    //     rightMCtr = leftMCtr = RisingEdgeForSP * grids;
+    // }
+    rightMCtr = right;
+    leftMCtr = left;
+
+    setTimerInterrupt();
+    attachInterrupt(1, countRight, RISING);
+
+    md.init();
+    md.setM2Speed(speedModeSpeed);
+    delay(4);
+    md.setM1Speed(speedModeSpeed);
+    while (--leftMCtr) {
+        while (digitalRead(motor_L));
+        while (!digitalRead(motor_L));
+        //wait for one cycle
+    }
+
+    detachTimerInterrupt();
+    detachInterrupt(1);
+
+    //brakeForRotation();
+}
 void demo() {
+    while (1) {
+        drift(1200, 2100);
+        drift(1200, 2100);
+        drift(2100, 1200);
+        drift(2100, 1200);
+        drift(2100, 1200);
+        drift(2100, 1200);
+        drift(1200, 2100);
+        drift(1200, 2100);
+    }
     /*drifting
     md.init();
     while (1) {
