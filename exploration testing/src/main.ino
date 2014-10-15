@@ -39,7 +39,7 @@ using namespace ArduinoJson::Generator;
 /**********************/
 
 #define RisingEdgePerTurnRight_200 391 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 393
+#define RisingEdgePerTurnLeft_200 395
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
