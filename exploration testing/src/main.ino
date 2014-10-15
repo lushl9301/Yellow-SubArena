@@ -935,7 +935,7 @@ char getChar() {
 
 void brakeForGoAhead() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(374, 400);
+        md.setBrakes(238, 255);
         //motor not start at the same time
         //not stop at the same time
         //make right motor skip a bit
@@ -945,6 +945,6 @@ void brakeForGoAhead() {
 
 void brakeForRotation() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(400, 400);
+        md.setBrakes(255, 255);
     }
 }
