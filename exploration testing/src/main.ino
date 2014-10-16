@@ -38,15 +38,15 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 391 //for speed 200 382
+#define RisingEdgePerTurnRight_200 384 //for speed 200 382
 #define RisingEdgePerTurnLeft_200 395
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
 #define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
 #define speedModeSpeed 300
-#define adjustDirectionSpeed 58
-#define adjustDistanceSpeed 100
+#define adjustDirectionSpeed 50
+#define adjustDistanceSpeed 90
 
 #define shortSensorToCM(ir_dis) (6787 / (ir_dis - 3) - 4)
 #define longSensorToCM(ir_dis) (16667 / (ir_dis + 15) - 10)
@@ -122,12 +122,15 @@ void setup() {
 void dailyTuning() {
     int i;
     
-    // i = 10;
-    // delay(1000);
-    // while (--i) {
-    //      straighten();
-    //      delay(1000);    
-    // }
+    i = 10;
+    delay(1000);
+    while (--i) {
+        turn(1);
+        straighten();
+        delay(1000);
+        turn(-1);
+        delay(1000);
+    }
 
     delay(1000);
     i = 13;
@@ -168,14 +171,22 @@ void turnAndGoTuning() {
 }
 
 void loop() {
+    //demo();
     //sptuning();
     //dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
-    //explorationFLow();
+    // explorationFLow();
+    
     // while (1) {
-    //     sensorReading();
+    //     //sensorReading();
+    //     delay(300);
+    //     if (isGoodObstacle()) {
+    //         Serial.println("YES");
+    //     } else {
+    //         Serial.println("NO");
+    //     }
     // }
 
     waitForCommand();
@@ -208,61 +219,41 @@ void loop() {
     }
 }
 
-
-void drift(int right, int left) {
-    speedMode = 1;
-    direction = 1;
-    delta = 0;
-    // if (grids == 1) {
-    //     rightMCtr = leftMCtr = RisingEdgePerGrid_300;
-    // } else {
-    //     rightMCtr = leftMCtr = RisingEdgeForSP * grids;
-    // }
-    rightMCtr = right;
-    leftMCtr = left;
-
-    setTimerInterrupt();
-    attachInterrupt(1, countRight, RISING);
-
-    md.init();
-    md.setM2Speed(speedModeSpeed);
-    delay(4);
-    md.setM1Speed(speedModeSpeed);
-    while (--leftMCtr) {
-        while (digitalRead(motor_L));
-        while (!digitalRead(motor_L));
-        //wait for one cycle
-    }
-
-    detachTimerInterrupt();
-    detachInterrupt(1);
-
-    //brakeForRotation();
-}
 void demo() {
-    while (1) {
-        drift(1200, 2100);
-        drift(1200, 2100);
-        drift(2100, 1200);
-        drift(2100, 1200);
-        drift(2100, 1200);
-        drift(2100, 1200);
-        drift(1200, 2100);
-        drift(1200, 2100);
-    }
-    /*drifting
+    // while (1) {
+    //     drift(200, 600, 3);
+    //     drift(200, 600, 3);
+    //     drift(600, 200, 0.3);
+    //     drift(600, 200, 0.3);
+    //     drift(600, 200, 0.3);
+    //     drift(600, 200, 0.3);
+    //     drift(200, 600, 3);
+    //     drift(200, 600, 3);
+    // }
+    // md.init();
+    // while (1) {
+    //     md.setSpeeds(330, -100);
+    //     delay(1300);
+    //     md.setSpeeds(200, 200);
+    //     delay(500);
+    //     md.setSpeeds(-100, 330);
+    //     delay(1300);
+    //     md.setSpeeds(200,200);
+    //     delay(500);
+    // }
+    // 
+    // 
     md.init();
     while (1) {
         md.setSpeeds(330, -100);
-        delay(2500);
+        delay(1800);
         md.setSpeeds(200, 200);
-        delay(2000);
+        delay(700);
         md.setSpeeds(-100, 330);
-        delay(2500);
+        delay(1800);
         md.setSpeeds(200,200);
-        delay(2000);
+        delay(700);
     }
-    */
     // int i = 4;
     // while(i) {
     //     --i;
@@ -376,7 +367,7 @@ void sensorReading() {
 
     int i;
 
-    i = 5;
+    i = 20;
     while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
         delay(2);
     }
@@ -736,6 +727,7 @@ void goAhead(int grids) {
     md.setM2Speed(speedModeSpeed);
     delay(4);
     md.setM1Speed(speedModeSpeed);
+    // md.setSpeeds(speedModeSpeed, speedModeSpeed);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -861,7 +853,6 @@ ISR(TIMER1_COMPA_vect) {
 
 
 void straighten() {
-    sensorReading();
     if (!isGoodObstacle()) {
         return;
     }
@@ -874,10 +865,10 @@ void straighten() {
 void adjustDirection() {
     //IR sensor make robot shake
     int l, r;
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < 350; i++) {
         l = shortIR_LF.getDis();
         r = shortIR_RF.getDis();
-        delay(1);
+        //delay(1);
         if (r > l) {
             md.setSpeeds(-adjustDirectionSpeed, adjustDirectionSpeed);
         } else if (r < l) {
@@ -914,9 +905,14 @@ void adjustDistance() {
 
 
 bool isGoodObstacle() {
-    return((shortSensorToCM(ir_rf_dis) < 26)
-           && shortSensorToCM(ir_lf_dis) < 26
-           && abs(shortSensorToCM(ir_rf_dis) - shortSensorToCM(ir_lf_dis)) <= 6);
+    sensorReading();
+    int ir_rf_dis_cm = shortSensorToCM(ir_rf_dis);
+    int ir_lf_dis_cm = shortSensorToCM(ir_lf_dis);
+
+    return(ir_lf_dis_cm < 26
+           && ir_rf_dis_cm < 26
+           && abs(ir_rf_dis_cm - ir_lf_dis_cm) <= 7
+           && abs(ir_rf_dis_cm - u_F_dis) <= 10);
 }
 
 bool isWithWall() {
@@ -935,7 +931,7 @@ char getChar() {
 
 void brakeForGoAhead() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(238, 255);
+        md.setBrakes(400, 400);
         //motor not start at the same time
         //not stop at the same time
         //make right motor skip a bit
@@ -945,6 +941,6 @@ void brakeForGoAhead() {
 
 void brakeForRotation() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(255, 255);
+        md.setBrakes(400, 400);
     }
 }
