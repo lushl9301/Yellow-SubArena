@@ -38,8 +38,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 384 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 395
+#define RisingEdgePerTurnRight_200 393 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 402
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
@@ -122,15 +122,15 @@ void setup() {
 void dailyTuning() {
     int i;
     
-    i = 10;
-    delay(1000);
-    while (--i) {
-        turn(1);
-        straighten();
-        delay(1000);
-        turn(-1);
-        delay(1000);
-    }
+    // i = 10;
+    // delay(1000);
+    // while (--i) {
+    //     turn(1);
+    //     straighten();
+    //     delay(1000);
+    //     turn(-1);
+    //     delay(1000);
+    // }
 
     delay(1000);
     i = 13;
@@ -176,6 +176,11 @@ void loop() {
     //dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
+    
+    // while (1) {
+    //     pwd = 3;
+    //     arriving(0);
+    // }
     
     // explorationFLow();
     
@@ -622,14 +627,26 @@ void remote() {
     Serial.print(toRPi);
 }
 
+void parking() {
+    u_F_dis = u_F.getDis();
+    while (u_F_dis > 10) {
+        md.setSpeeds(120, 120);
+        delay(50);
+        u_F_dis = u_F.getDis();
+    }
+    brakeForRotation();
+}
+
 void arriving(int endPoint) {
     //when near the end point
     //do nice stop
     if (endPoint) {
         if (pwd == 3) {
+            parking();
             straighten();
             turn(-1); //face down/3
         }
+        parking();
         straighten();
     
         //now face 3
@@ -639,9 +656,11 @@ void arriving(int endPoint) {
         turn(1);
     } else {
         if (pwd == 1) {
+            parking();
             straighten();
             turn(-1); //face up/1
         }
+        parking();
         straighten();
 
         //now face up 1
@@ -671,10 +690,6 @@ void arriving(int endPoint) {
 void getFRInstructions() {
     //get shortest path from RPi
     //then move
-
-    turn(-1);
-    straighten();
-    turn(1);
 
     int instrChar;
     grids = 0;
@@ -909,8 +924,8 @@ bool isGoodObstacle() {
     int ir_rf_dis_cm = shortSensorToCM(ir_rf_dis);
     int ir_lf_dis_cm = shortSensorToCM(ir_lf_dis);
 
-    return(ir_lf_dis_cm < 26
-           && ir_rf_dis_cm < 26
+    return(ir_lf_dis_cm < 23
+           && ir_rf_dis_cm < 23
            && abs(ir_rf_dis_cm - ir_lf_dis_cm) <= 7
            && abs(ir_rf_dis_cm - u_F_dis) <= 10);
 }
