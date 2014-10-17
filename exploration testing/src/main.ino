@@ -38,8 +38,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 393 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 402
+#define RisingEdgePerTurnRight_200 389 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 395
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
@@ -132,12 +132,12 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    delay(1000);
-    i = 13;
-    while (--i) {
-        turn(1);
-        delay(200);
-    }
+    // delay(1000);
+    // i = 13;
+    // while (--i) {
+    //     turn(1);
+    //     delay(200);
+    // }
 
     delay(1000);
     i = 13;
@@ -171,7 +171,7 @@ void turnAndGoTuning() {
 }
 
 void loop() {
-    //demo();
+    demo();
     //sptuning();
     //dailyTuning();
     //turnAndGoTuning();
@@ -180,6 +180,7 @@ void loop() {
     // while (1) {
     //     pwd = 3;
     //     arriving(0);
+    //     delay(1000);
     // }
     
     // explorationFLow();
@@ -326,36 +327,39 @@ void explorationFLow() {
     //CASE #1
     //West Wall
     
-    if (currentX <= 3) {
+    if (currentX <= 2) {
         goToGoal();
         goToStart();
         goto FinishExploration;
-    }
+    } else
 
     //CASE #2
     //South Wall
-    if (currentY >= 18) {
+    if (currentY >= 14) {
         goToGoal();
         goToStart();
         goto FinishExploration;
-    }
+    } else
 
     //CASE #3
     //East Wall
-    if (currentX >= 13) {
+    if (currentX >= 19) {
         goToStart();
         turn(1);
         goToGoal();
         goToStart();
         goto FinishExploration;
-    }
+    } else
 
     //CASE #4
     //North Wall
-    if (currentY <= 3) {
+    if (currentY <= 2) {
         goToStart();
         turn(1);
         goToGoal();
+        goToStart();
+        goto FinishExploration;
+    } else {
         goToStart();
         goto FinishExploration;
     }
@@ -628,7 +632,7 @@ void remote() {
 }
 
 void parking() {
-    u_F_dis = u_F.getDis();
+    int u_F_dis = u_F.getDis();
     while (u_F_dis > 10) {
         md.setSpeeds(120, 120);
         delay(50);
@@ -946,7 +950,7 @@ char getChar() {
 
 void brakeForGoAhead() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(400, 400);
+        md.setBrakes(373, 400);
         //motor not start at the same time
         //not stop at the same time
         //make right motor skip a bit
