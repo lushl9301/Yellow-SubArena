@@ -429,53 +429,36 @@ void thinkForAWhile() {
 }
 
 void exploration() {
-    empty_space_R = 0;
-    int flag_turn_right_just_now = 0;
-    //this flag is used for robot should turn right now
-    //it turns but see front cannot go:
-    //1. turn right one grid early
-    //2. space not enough
-    //what we do here is
-    //a. turn right and enable flag
-    //b. turn left back and disable turn right
-    //c. go one grid further
-    //d. if u_R see empty space. turn right and check.
+    empty_space_R = 0;  
     
     while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { 
         //get all sensor data here.
         sensorReading();
-        if (flag_turn_right_just_now >= 0 && u_R_dis > 12) { //right got space
-            if (++empty_space_R >= 2) {
+        if (shortSensorToCM(ir_r_dis) > 12) { //right got space
+            if (++empty_space_R >= 3) {
                 turn(1);
-                flag_turn_right_just_now = 1;
                 empty_space_R = -1;
                 //counter_for_straighten = stepToStraighten;
                 continue;
             }
         } else {
-            if (flag_turn_right_just_now != -1) {
-                empty_space_R = 0;
-                if (--counter_for_straighten == 0) {    //auto fix
-                    turn(1);    //turn right
-                    straighten();
-                    turn(-1);   //turn left
-                    counter_for_straighten = stepToStraighten;
-                    sensorReading();
-                }
+            empty_space_R = 0;
+            if (--counter_for_straighten == 0) {    //auto fix
+                turn(1);    //turn right
+                straighten();
+                turn(-1);   //turn left
+                counter_for_straighten = stepToStraighten;
+                sensorReading();
             }
         }
 
         if (obstacleInFront()) {
             //Serial.println("something in front");
             straighten();
-            turn(-1);   //turn left
-            if (flag_turn_right_just_now == 1) {
+            if (u_F_dis > 12 && ir_lf_dis < 400 && ir_rf_dis > 400) {
                 empty_space_R = 1;
-                flag_turn_right_just_now = -1;
-            } else {
-                flag_turn_right_just_now = 0;
-                empty_space_R = 0;
             }
+            turn(-1);   //turn left
             //counter_for_straighten = stepToStraighten;
             continue;
         }
@@ -484,7 +467,6 @@ void exploration() {
         //if (u_F_dis > 12 && ir_rf_dis < 400 && ir_lf_dis < 400)
         //    then go
         goAhead(1);
-        flag_turn_right_just_now = 0;
     }
 }
 
