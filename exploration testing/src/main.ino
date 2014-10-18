@@ -431,6 +431,15 @@ void thinkForAWhile() {
 void exploration() {
     empty_space_R = 0;
     int flag_turn_right_just_now = 0;
+    //this flag is used for robot should turn right now
+    //it turns but see front cannot go:
+    //1. turn right one grid early
+    //2. space not enough
+    //what we do here is
+    //a. turn right and enable flag
+    //b. turn left back and disable turn right
+    //c. go one grid further
+    //d. if u_R see empty space. turn right and check.
     
     while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { 
         //get all sensor data here.
@@ -440,17 +449,19 @@ void exploration() {
                 turn(1);
                 flag_turn_right_just_now = 1;
                 empty_space_R = -1;
-                counter_for_straighten = stepToStraighten;
+                //counter_for_straighten = stepToStraighten;
                 continue;
             }
         } else {
-            empty_space_R = 0;
-            if (--counter_for_straighten == 0) {    //auto fix
-                turn(1);    //turn right
-                straighten();
-                turn(-1);   //turn left
-                counter_for_straighten = stepToStraighten;
-                sensorReading();
+            if (flag_turn_right_just_now != -1) {
+                empty_space_R = 0;
+                if (--counter_for_straighten == 0) {    //auto fix
+                    turn(1);    //turn right
+                    straighten();
+                    turn(-1);   //turn left
+                    counter_for_straighten = stepToStraighten;
+                    sensorReading();
+                }
             }
         }
 
@@ -458,14 +469,14 @@ void exploration() {
             //Serial.println("something in front");
             straighten();
             turn(-1);   //turn left
-            empty_space_R = 0;
             if (flag_turn_right_just_now == 1) {
                 empty_space_R = 1;
                 flag_turn_right_just_now = -1;
             } else {
                 flag_turn_right_just_now = 0;
+                empty_space_R = 0;
             }
-            counter_for_straighten = stepToStraighten;
+            //counter_for_straighten = stepToStraighten;
             continue;
         }
 
