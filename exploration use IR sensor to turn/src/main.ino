@@ -158,7 +158,7 @@ void sptuning() {
     // turn(1);
     int grids = 17;
     while (grids-- != 0) {
-        goAhead(1);
+        goAhead(grids);
         delay(1000);
     }
 }
@@ -179,6 +179,7 @@ void loop() {
     
     // while (1) {
     //     pwd = 3;
+    //     parking();
     //     arriving(0);
     //     delay(1000);
     // }
