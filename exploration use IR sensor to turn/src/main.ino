@@ -38,8 +38,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 389 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 395
+#define RisingEdgePerTurnRight_200 392 //for speed 200 382
+#define RisingEdgePerTurnLeft_200 398
 #define RisingEdgePerGrid_300 272 // need testing
 #define RisingEdgePerGrid_400 290
 #define RisingEdgeForSP 296
@@ -132,12 +132,12 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    // delay(1000);
-    // i = 13;
-    // while (--i) {
-    //     turn(1);
-    //     delay(200);
-    // }
+    delay(1000);
+    i = 13;
+    while (--i) {
+        turn(1);
+        delay(200);
+    }
 
     delay(1000);
     i = 13;
@@ -171,7 +171,7 @@ void turnAndGoTuning() {
 }
 
 void loop() {
-    demo();
+    //demo();
     //sptuning();
     //dailyTuning();
     //turnAndGoTuning();
@@ -183,7 +183,7 @@ void loop() {
     //     delay(1000);
     // }
     
-    // explorationFLow();
+    //explorationFLow();
     
     // while (1) {
     //     //sensorReading();
@@ -434,11 +434,11 @@ void exploration() {
     while (abs(goalX - currentX) >= 3 || abs(goalY - currentY) >= 3) { 
         //get all sensor data here.
         sensorReading();
-        if (shortSensorToCM(ir_r_dis) > 12) { //right got space
+        if (shortSensorToCM(ir_r_dis) > 11) { //right got space
             if (++empty_space_R >= 3) {
                 turn(1);
                 empty_space_R = -1;
-                //counter_for_straighten = stepToStraighten;
+                counter_for_straighten = stepToStraighten;
                 continue;
             }
         } else {
@@ -459,7 +459,7 @@ void exploration() {
                 empty_space_R = 1;
             }
             turn(-1);   //turn left
-            //counter_for_straighten = stepToStraighten;
+            counter_for_straighten = stepToStraighten - 1;
             continue;
         }
 
