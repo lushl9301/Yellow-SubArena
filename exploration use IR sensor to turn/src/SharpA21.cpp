@@ -6,47 +6,32 @@ SharpA21::SharpA21() {
 
 void SharpA21::init(int inputPin) {
     _inputPin = inputPin;
-    //init random data into circular queue
-    randomSeed(analogRead(_inputPin));
     for (int i = 0; i < FilterLength; ++i) {
-        _inputs[i] = random(295, 305);
+        _inputs[i] = 500;
     }
-    _head = 6;
 }
 
 int SharpA21::getDis() {
-    // int _results[7], _temp;
-    // for (int k = 0; k < 7; k++) {
-    //     // for (int i = 0; i < 5; i++) {
-    //     //     _inputs[_head] = analogRead(_inputPin);
-    //     //     --_head;
-    //     //     if (_head < 0) {
-    //     //         _head = 6;
-    //     //     }
-    //     //     _ds.windowFilter7(_inputs, _head);
-    //     // }
-    //     //_results[k] = _inputs[(_head + 1) % 7];
-    //     _results[k] = analogRead(_inputPin);
-    // }
+    int _temp;
 
-    // for (int i = 0; i < 7; i++) {
-    //     for (int j = 0; j < 7; j++) {
-    //         if (_results[i] > _results[j]) {
-    //             _temp = _results[i];
-    //             _results[i] = _results[j];
-    //             _results[j] = _temp;
-    //         }
-    //     }
-    // }
-    // return (_results[3]);
-        int a;
-        analogRead(_inputPin);
-        analogRead(_inputPin);
-        a = analogRead(_inputPin);
-        a += analogRead(_inputPin);
-        a += analogRead(_inputPin);
-        a += analogRead(_inputPin);
-        return(a >> 2);
+    analogRead(_inputPin);
+    analogRead(_inputPin);
+    analogRead(_inputPin);
+    
+    for (int i = 0; i < 7; i++) {
+        _inputs[i] = analogRead(_inputPin);
+    }
+
+    for (int i = 0; i < 7; i++) {
+        for (int j = 0; j < 7; j++) {
+            if (_inputs[i] > _inputs[j]) {
+                _temp = _inputs[i];
+                _inputs[i] = _inputs[j];
+                _inputs[j] = _temp;
+            }
+        }
+    }
+    return (_inputs[3]);
 }
 
 int SharpA21::getDisCM() {
