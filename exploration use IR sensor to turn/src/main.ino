@@ -38,15 +38,19 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 392 //for speed 200 382
-#define RisingEdgePerTurnLeft_200 398
-#define RisingEdgePerGrid_300 272 // need testing
-#define RisingEdgePerGrid_400 290
-#define RisingEdgeForSP 296
-#define stepToStraighten 3 //every 3 step make a auto adjust 3 OCT
+#define RisingEdgePerTurnRight_200 394 // 392
+#define RisingEdgePerTurnLeft_200 399  // 396
+#define RisingEdgePerGrid_300 276
+#define RisingEdgeForSP 298
+//Speed
+#define slowSpeed 200
 #define speedModeSpeed 300
+#define fastRunSpeed 400
 #define adjustDirectionSpeed 50
 #define adjustDistanceSpeed 90
+//auto align frequence
+#define stepToStraighten 4 //every 3 step make a auto adjust 3 OCT
+
 
 #define shortSensorToCM(ir_dis) (6787 / (ir_dis - 3) - 4)
 #define longSensorToCM(ir_dis) (16667 / (ir_dis + 15) - 10)
@@ -55,9 +59,10 @@ using namespace ArduinoJson::Generator;
 volatile int direction;
 volatile int delta;
 volatile int rightMCtr, leftMCtr;
-volatile int speedMode;  //1 for fast(400), 0 for slow(200)
+volatile int MODE;  //2 for fast run; 1 for speedMode(300), 0 for rotation(200)
 
 volatile int grids;
+volatile int currentSpeed;
 
 volatile int counter_for_straighten;
 volatile int empty_space_R;
@@ -156,11 +161,16 @@ void sptuning() {
     // straighten();
     // turn(1);
     // turn(1);
+    turn(-1);
+    straighten();
+    turn(1);
+    delay(500);
     int grids = 17;
     while (grids-- != 0) {
-        goAhead(grids);
+        goAhead(1);
         delay(1000);
     }
+    //goAhead(17);
 }
 
 void turnAndGoTuning() {
@@ -171,7 +181,6 @@ void turnAndGoTuning() {
 }
 
 void loop() {
-    //demo();
     //sptuning();
     //dailyTuning();
     //turnAndGoTuning();
@@ -224,73 +233,6 @@ void loop() {
             // error
             break;
     }
-}
-
-void demo() {
-    // while (1) {
-    //     drift(200, 600, 3);
-    //     drift(200, 600, 3);
-    //     drift(600, 200, 0.3);
-    //     drift(600, 200, 0.3);
-    //     drift(600, 200, 0.3);
-    //     drift(600, 200, 0.3);
-    //     drift(200, 600, 3);
-    //     drift(200, 600, 3);
-    // }
-    // md.init();
-    // while (1) {
-    //     md.setSpeeds(330, -100);
-    //     delay(1300);
-    //     md.setSpeeds(200, 200);
-    //     delay(500);
-    //     md.setSpeeds(-100, 330);
-    //     delay(1300);
-    //     md.setSpeeds(200,200);
-    //     delay(500);
-    // }
-    // 
-    // 
-    md.init();
-    while (1) {
-        md.setSpeeds(330, -100);
-        delay(1800);
-        md.setSpeeds(200, 200);
-        delay(700);
-        md.setSpeeds(-100, 330);
-        delay(1800);
-        md.setSpeeds(200,200);
-        delay(700);
-    }
-    // int i = 4;
-    // while(i) {
-    //     --i;
-    //     goAhead(10);
-    //     turn(1);
-    //     turn(1);
-    //     goAhead(10);
-    //     delay(500);
-    // }
-    // delay(5000);
-    // Serial.println("Start");
-    // while (1) {
-    //     sensorReading();
-    //     delay(500);
-    // }
-    // delay(5000);
-
-    // RisingEdgePerTurn_200 /= 2;
-    // RisingEdgePerTurn_200 -= 10;
-    // i = 8;
-    // while (i--) {
-    //     turn(1);
-    //     delay(200);
-    // }
-    // RisingEdgePerTurn_200 = 395 * 4 + 35;
-    // i = 3;
-    // while (i--) {
-    //     turn(1);
-    //     delay(400);
-    // }
 }
 
 void goToStart() {
@@ -377,7 +319,7 @@ void sensorReading() {
 
     int i;
 
-    i = 20;
+    i = 5;
     while (--i > 0 && ((u_F_dis = u_F.getDis()) == 0 || u_F_dis > 200)) {
         delay(2);
     }
@@ -439,7 +381,7 @@ void exploration() {
             if (++empty_space_R >= 3) {
                 turn(1);
                 empty_space_R = -1;
-                counter_for_straighten = stepToStraighten;
+                counter_for_straighten = stepToStraighten - 1;
                 continue;
             }
         } else {
@@ -628,8 +570,8 @@ void remote() {
 void parking() {
     int u_F_dis = u_F.getDis();
     while (u_F_dis > 10) {
-        md.setSpeeds(120, 120);
-        delay(50);
+        md.setSpeeds(220, 220);
+        delay(10);
         u_F_dis = u_F.getDis();
     }
     brakeForRotation();
@@ -692,6 +634,7 @@ void getFRInstructions() {
     int instrChar;
     grids = 0;
     int auto_alignment_counter = 5;
+
     while (1) {
         
         grids = 0;
@@ -724,23 +667,25 @@ void getFRInstructions() {
 
 
 void goAhead(int grids) {
-    speedMode = 1;
-    direction = 1;
+    MODE = 1;
     delta = 0;
+    currentSpeed = 300;
     if (grids == 1) {
         rightMCtr = leftMCtr = RisingEdgePerGrid_300;
     } else {
+        MODE = 2;
+        currentSpeed = 400;
         rightMCtr = leftMCtr = RisingEdgeForSP * grids;
-    }    
+    }
 
     setTimerInterrupt();
     attachInterrupt(1, countRight, RISING);
 
     md.init();
-    md.setM2Speed(speedModeSpeed);
-    delay(4);
-    md.setM1Speed(speedModeSpeed);
-    // md.setSpeeds(speedModeSpeed, speedModeSpeed);
+    // md.setM2Speed(currentSpeed);
+    // delay(4);
+    // md.setM1Speed(currentSpeed);
+    md.setSpeeds(speedModeSpeed, speedModeSpeed);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -777,11 +722,11 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    delay(100);
+    delay(50);
 }
 
 void turn(int turnRight) {
-    speedMode = 0;
+    MODE = 0;
     direction = turnRight;
     delta = 0;
     if (turnRight == 1) {
@@ -814,7 +759,7 @@ void turn(int turnRight) {
     } else if (pwd == 0) {
         pwd = 4;
     }
-    delay(100);
+    delay(50);
 }
 
 
@@ -851,10 +796,12 @@ void detachTimerInterrupt() {
   sei();
 }
 ISR(TIMER1_COMPA_vect) {
-    if (speedMode) {
-        md.setM2Speed((speedModeSpeed - delta) * direction);
+    if (MODE == 2) {
+        md.setM2Speed((fastRunSpeed - delta));
+    } else if (MODE == 1) {
+        md.setM2Speed(speedModeSpeed - delta);
     } else {
-        md.setM2Speed((200 - delta) * direction);
+        md.setM2Speed((slowSpeed - delta) * direction);
     }
 }
 
@@ -872,7 +819,7 @@ void straighten() {
     adjustDistance();
     delay(50);
     adjustDirection();
-    delay(100);
+    delay(80);
 }
 
 void adjustDirection() {
@@ -944,7 +891,7 @@ char getChar() {
 
 void brakeForGoAhead() {
     for (int i = 3; i > 0; i--) {
-        md.setBrakes(373, 400);
+        md.setBrakes(370, 400);
         //motor not start at the same time
         //not stop at the same time
         //make right motor skip a bit
