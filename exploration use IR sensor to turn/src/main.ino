@@ -41,11 +41,11 @@ using namespace ArduinoJson::Generator;
 #define RisingEdgePerTurnRight_200 394 // 392
 #define RisingEdgePerTurnLeft_200 399  // 396
 #define RisingEdgePerGrid_300 276
-#define RisingEdgeForSP 298
+#define RisingEdgeForSP 296
 //Speed
 #define slowSpeed 200
 #define speedModeSpeed 300
-#define fastRunSpeed 400
+#define fastRunSpeed 380
 #define adjustDirectionSpeed 50
 #define adjustDistanceSpeed 90
 //auto align frequence
@@ -196,13 +196,14 @@ void loop() {
     //explorationFLow();
     
     // while (1) {
-    //     //sensorReading();
+    //     sensorReading();
+    //     // delay(300);
+    //     // if (isGoodObstacle()) {
+    //     //     Serial.println("YES");
+    //     // } else {
+    //     //     Serial.println("NO");
+    //     // }
     //     delay(300);
-    //     if (isGoodObstacle()) {
-    //         Serial.println("YES");
-    //     } else {
-    //         Serial.println("NO");
-    //     }
     // }
 
     waitForCommand();
@@ -279,6 +280,8 @@ void explorationFLow() {
     //CASE #2
     //South Wall
     if (currentY >= 14) {
+        goToGoal();
+        goToStart();
         goToGoal();
         goToStart();
         goto FinishExploration;
@@ -674,7 +677,7 @@ void goAhead(int grids) {
         rightMCtr = leftMCtr = RisingEdgePerGrid_300;
     } else {
         MODE = 2;
-        currentSpeed = 400;
+        currentSpeed = fastRunSpeed;
         rightMCtr = leftMCtr = RisingEdgeForSP * grids;
     }
 
@@ -685,7 +688,7 @@ void goAhead(int grids) {
     // md.setM2Speed(currentSpeed);
     // delay(4);
     // md.setM1Speed(currentSpeed);
-    md.setSpeeds(speedModeSpeed, speedModeSpeed);
+    md.setSpeeds(currentSpeed, currentSpeed);
     while (--leftMCtr) {
         while (digitalRead(motor_L));
         while (!digitalRead(motor_L));
@@ -881,7 +884,7 @@ bool isWithWall() {
 }
 
 bool obstacleInFront() {
-    return(u_F_dis <= 12 || ir_lf_dis > 400 || ir_rf_dis > 400);
+    return(u_F_dis <= 14 || ir_lf_dis > 400 || ir_rf_dis > 400);
 }
 
 char getChar() {
