@@ -1,3 +1,4 @@
+//jiayou yidingyaochenggong
 #include "avr/io.h"    // hmm
 #include "avr/interrupt.h" //
 
@@ -38,10 +39,10 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 394 // 392
-#define RisingEdgePerTurnLeft_200 399  // 396
+#define RisingEdgePerTurnRight_200 389 // 392
+#define RisingEdgePerTurnLeft_200 397  // 396
 #define RisingEdgePerGrid_300 276
-#define RisingEdgeForSP 296
+#define RisingEdgeForSP 295
 //Speed
 #define slowSpeed 200
 #define speedModeSpeed 300
@@ -137,12 +138,12 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    delay(1000);
-    i = 13;
-    while (--i) {
-        turn(1);
-        delay(200);
-    }
+    // delay(1000);
+    // i = 13;
+    // while (--i) {
+    //     turn(1);
+    //     delay(200);
+    // }
 
     delay(1000);
     i = 13;
@@ -166,11 +167,11 @@ void sptuning() {
     turn(1);
     delay(500);
     int grids = 17;
-    while (grids-- != 0) {
-        goAhead(1);
-        delay(1000);
-    }
-    //goAhead(17);
+    // while (grids-- != 0) {
+    //     goAhead();
+    //     delay(1000);
+    // }
+    goAhead(17);
 }
 
 void turnAndGoTuning() {
@@ -573,8 +574,8 @@ void remote() {
 void parking() {
     int u_F_dis = u_F.getDis();
     while (u_F_dis > 10) {
-        md.setSpeeds(220, 220);
-        delay(10);
+        md.setSpeeds(190, 190);
+        delay(3);
         u_F_dis = u_F.getDis();
     }
     brakeForRotation();
