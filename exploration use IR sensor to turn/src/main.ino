@@ -46,7 +46,7 @@ using namespace ArduinoJson::Generator;
 //Speed
 #define slowSpeed 200
 #define speedModeSpeed 300
-#define fastRunSpeed 380
+#define fastRunSpeed 400
 #define adjustDirectionSpeed 50
 #define adjustDistanceSpeed 90
 //auto align frequence
@@ -156,12 +156,6 @@ void dailyTuning() {
 
 void sptuning() {
 
-    // turn(-1);
-    // straighten();
-    // turn(-1);
-    // straighten();
-    // turn(1);
-    // turn(1);
     turn(-1);
     straighten();
     turn(1);
@@ -215,14 +209,6 @@ void loop() {
             break;
         }
         case 'P': {
-            // turn(1);
-            // goalX = 20;
-            // goalY = 15;
-            // exploration();
-            // JsonObject<2> toRPi_t;
-            // toRPi_t["type"] = "status";
-            // toRPi_t["data"] = "END_PATH";
-            // Serial.println(toRPi_t);
             Serial.println("START Shortest Path");
             bridesheadRevisited();
             break; 
@@ -651,10 +637,10 @@ void getFRInstructions() {
         }
 
         if (instrChar == 'R') {
-            straighten();
+            // straighten();
             turn(1);
         } else if (instrChar == 'L') {
-            straighten();
+            // straighten();
             turn(-1);
         } else if (instrChar == 'G') {
             arriving(1);
@@ -726,7 +712,9 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    delay(50);
+    if (MODE != 2) {
+        delay(50);
+    }
 }
 
 void turn(int turnRight) {
@@ -763,7 +751,7 @@ void turn(int turnRight) {
     } else if (pwd == 0) {
         pwd = 4;
     }
-    delay(50);
+    delay(30);
 }
 
 
@@ -801,7 +789,7 @@ void detachTimerInterrupt() {
 }
 ISR(TIMER1_COMPA_vect) {
     if (MODE == 2) {
-        md.setM2Speed((fastRunSpeed - delta));
+        md.setSpeeds(fastRunSpeed + delta, fastRunSpeed - delta);
     } else if (MODE == 1) {
         md.setM2Speed(speedModeSpeed - delta);
     } else {
