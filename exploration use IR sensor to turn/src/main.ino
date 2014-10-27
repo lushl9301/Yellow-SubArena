@@ -39,8 +39,8 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 389 // 392
-#define RisingEdgePerTurnLeft_200 397  // 396
+#define RisingEdgePerTurnRight_200 392 // 392
+#define RisingEdgePerTurnLeft_200 398  // 396
 #define RisingEdgePerGrid_300 276
 #define RisingEdgeForSP 295
 //Speed
@@ -138,12 +138,12 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    // delay(1000);
-    // i = 13;
-    // while (--i) {
-    //     turn(1);
-    //     delay(200);
-    // }
+    delay(1000);
+    i = 13;
+    while (--i) {
+        turn(1);
+        delay(200);
+    }
 
     delay(1000);
     i = 13;
@@ -161,11 +161,14 @@ void sptuning() {
     turn(1);
     delay(500);
     int grids = 17;
-    // while (grids-- != 0) {
-    //     goAhead();
-    //     delay(1000);
-    // }
-    goAhead(17);
+    while (grids-- != 0) {
+        goAhead(1);
+        delay(1000);
+    }
+    // goAhead(17);
+    // turn(-1);
+    // straighten();
+    // turn(-1);
 }
 
 void turnAndGoTuning() {
@@ -269,6 +272,7 @@ void explorationFLow() {
     if (currentY >= 14) {
         goToGoal();
         goToStart();
+        turn(1);
         goToGoal();
         goToStart();
         goto FinishExploration;
@@ -616,7 +620,6 @@ void arriving(int endPoint) {
 }
 
 
-
 void getFRInstructions() {
     //get shortest path from RPi
     //then move
@@ -643,7 +646,8 @@ void getFRInstructions() {
             // straighten();
             turn(-1);
         } else if (instrChar == 'G') {
-            arriving(1);
+            parking();
+            straighten();
             return;
         }
     }
@@ -659,7 +663,7 @@ void getFRInstructions() {
 void goAhead(int grids) {
     MODE = 1;
     delta = 0;
-    currentSpeed = 300;
+    currentSpeed = speedModeSpeed;
     if (grids == 1) {
         rightMCtr = leftMCtr = RisingEdgePerGrid_300;
     } else {
@@ -712,9 +716,9 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    if (MODE != 2) {
+    //if (MODE != 2) {
         delay(50);
-    }
+    //}
 }
 
 void turn(int turnRight) {
