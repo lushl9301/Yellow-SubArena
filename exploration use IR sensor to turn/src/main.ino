@@ -180,7 +180,7 @@ void turnAndGoTuning() {
 
 void loop() {
     //sptuning();
-    //dailyTuning();
+    dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
@@ -640,14 +640,11 @@ void getFRInstructions() {
         }
 
         if (instrChar == 'R') {
-            // straighten();
             turn(1);
         } else if (instrChar == 'L') {
-            // straighten();
             turn(-1);
         } else if (instrChar == 'G') {
             parking();
-            straighten();
             return;
         }
     }
