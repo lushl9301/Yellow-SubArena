@@ -39,7 +39,7 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 390 // 392
+#define RisingEdgePerTurnRight_200 387 // 392
 #define RisingEdgePerTurnLeft_200 393  // 394
 #define RisingEdgePerGrid_300 276
 #define RisingEdgeForSP 295
@@ -145,12 +145,12 @@ void dailyTuning() {
         delay(200);
     }
 
-    // delay(1000);
-    // i = 13;
-    // while (--i) {
-    //     turn(-1);
-    //     delay(200);
-    // }
+    delay(1000);
+    i = 13;
+    while (--i) {
+        turn(-1);
+        delay(200);
+    }
 
 }
 
@@ -182,7 +182,7 @@ void turnAndGoTuning() {
 
 void loop() {
     //sptuning();
-    //dailyTuning();
+    dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
