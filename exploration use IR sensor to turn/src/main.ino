@@ -39,14 +39,14 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 392 // 392
-#define RisingEdgePerTurnLeft_200 398  // 396
+#define RisingEdgePerTurnRight_200 390 // 392
+#define RisingEdgePerTurnLeft_200 393  // 394
 #define RisingEdgePerGrid_300 276
 #define RisingEdgeForSP 295
 //Speed
 #define slowSpeed 200
 #define speedModeSpeed 300
-#define fastRunSpeed 400
+#define fastRunSpeed 380
 #define adjustDirectionSpeed 50
 #define adjustDistanceSpeed 90
 //auto align frequence
@@ -145,12 +145,12 @@ void dailyTuning() {
         delay(200);
     }
 
-    delay(1000);
-    i = 13;
-    while (--i) {
-        turn(-1);
-        delay(200);
-    }
+    // delay(1000);
+    // i = 13;
+    // while (--i) {
+    //     turn(-1);
+    //     delay(200);
+    // }
 
 }
 
@@ -161,11 +161,13 @@ void sptuning() {
     turn(1);
     delay(500);
     int grids = 17;
-    while (grids-- != 0) {
-        goAhead(1);
-        delay(1000);
-    }
-    // goAhead(17);
+    // while (grids-- != 0) {
+    //     goAhead(1);
+    //     delay(1000);
+    // }
+    goAhead(17);
+    turn(1);
+    goAhead(12);
     // turn(-1);
     // straighten();
     // turn(-1);
@@ -173,19 +175,19 @@ void sptuning() {
 
 void turnAndGoTuning() {
     while (1) {
-        turn(-1);
+        turn(1);
         goAhead(1);
     }
 }
 
 void loop() {
     //sptuning();
-    dailyTuning();
+    //dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
     // while (1) {
-    //     pwd = 3;
+    //     pwd = 4;
     //     parking();
     //     arriving(0);
     //     delay(1000);
@@ -230,20 +232,20 @@ void goToStart() {
     goalX = 1;
     goalY = 1;
     exploration();
-    Serial.println("I reach START");
-    arriving(0);
+    //Serial.println("I reach START");
     currentX = 2;
     currentY = 2;
+    arriving(0);
 }
 
 void goToGoal() {
     goalX = 20;
     goalY = 15;
     exploration();
-    Serial.println("I reach GOAL");
-    arriving(1);
+    //Serial.println("I reach GOAL");
     currentX = 19;
     currentY = 14;
+    arriving(1);
 }
 
 void explorationFLow() {
@@ -425,7 +427,7 @@ bool findWall() {
         f_dis = u_F_dis;
     }
     
-    int tempDis = f_dis;
+    int tempDis = f_dis * 5;
     int tempMin = 1;
     
     for (int i = 2; i <= 4; ++i) {
@@ -435,14 +437,31 @@ bool findWall() {
         if (u_F_dis > f_dis) {
             f_dis = u_F_dis;
         }
+        if (i < 4) {
+            f_dis *= 3;
+        } else {
+            f_dis *= 5;
+        }
         if (tempDis < f_dis) {
             tempMin = i;
             tempDis = f_dis;
         }
     }
-    turn(1);
-    for (int i = 1; i < tempMin; ++i) {
-        turn(1);
+    // turn(1);
+    // for (int i = 1; i < tempMin; ++i) {
+    //     turn(1);
+    // }
+    switch (tempMin) {
+        case 4:
+            break;
+        case 3:
+            turn(-1);
+            break;
+        case 2:
+            turn(1);
+            turn(1);
+        default:
+            turn(1);
     }
 
     sensorReading();
@@ -488,7 +507,7 @@ bool findWall() {
 
     int grids2goback = abs(abs(farthestX) - currentX) + abs(abs(farthestY) - currentY)  ;
     //Serial.println("Go back =======>");
-    Serial.println(grids2goback);
+    //Serial.println(grids2goback);
     while (grids2goback > 0) {
         sensorReading();
         goAhead(1);
@@ -558,15 +577,27 @@ void remote() {
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_RMT";
-    Serial.print(toRPi);
+    Serial.println(toRPi);
 }
 
-void parking() {
+void parking_U() {
     int u_F_dis = u_F.getDis();
     while (u_F_dis > 10) {
         md.setSpeeds(190, 190);
         delay(3);
         u_F_dis = u_F.getDis();
+    }
+    brakeForRotation();
+}
+
+void parking() {
+    int ir_dis = min(shortSensorToCM(shortIR_LF.getDis()), shortSensorToCM(shortIR_RF.getDis()));
+    Serial.println(ir_dis);
+    while (ir_dis > 15) {
+        md.setSpeeds(190, 190);
+        delay(3);
+        ir_dis = min(shortSensorToCM(shortIR_LF.getDis()), shortSensorToCM(shortIR_RF.getDis()));
+        Serial.println(ir_dis);
     }
     brakeForRotation();
 }
@@ -585,6 +616,7 @@ void arriving(int endPoint) {
     
         //now face 3
         turn(1); // turn right
+        parking();
         straighten();
         turn(1);
         turn(1);
@@ -599,6 +631,7 @@ void arriving(int endPoint) {
 
         //now face up 1
         turn(1); //turn right
+        parking();
         straighten();
         turn(1);
     }
@@ -633,7 +666,6 @@ void getFRInstructions() {
         grids = 0;
         while (isDigit(instrChar = getChar())) {
             grids = grids * 10 + (char)instrChar - '0';
-            Serial.println(grids);
         }
         if (grids != 0) {
             goAhead(grids);
