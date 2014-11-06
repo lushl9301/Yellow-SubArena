@@ -1,6 +1,7 @@
 #2014MDPGrp10
 
 #arduino part
+[![Build Status](https://magnum.travis-ci.com/lushl9301/Yellow-SubArena.svg?token=E3EKyYWzVRmhonjJcnJk)](https://magnum.travis-ci.com/lushl9301/Yellow-SubArena)
 
 ##Project Deliverable Checklist Assessment Form
 

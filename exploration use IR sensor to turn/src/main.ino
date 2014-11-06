@@ -1,10 +1,9 @@
-//jiayou yidingyaochenggong
-#include "avr/io.h"    // hmm
-#include "avr/interrupt.h" //
+#include "avr/io.h"
+#include "avr/interrupt.h"
 
-#include "SharpA21.h"  // Short-distance
-#include "SharpA02.h"  // Long-distance
-#include "URM37.h"     // Ultrasonic
+#include "SharpA21.h"  // Short-distance IR Sensor
+#include "SharpA02.h"  // Long-distance IR Sensor
+#include "URM37.h"     // Ultrasonic Sensor
 #include "MotorShield.h"
 
 #include "JsonGenerator/JsonGenerator.h" //adding Json generator https://github.com/bblanchon/ArduinoJson
@@ -26,7 +25,7 @@ using namespace ArduinoJson::Generator;
 #define urPWM_R 5
 
 #define motor_L 13  // encoder
-#define motor_R 3     // encoder
+#define motor_R 3   // encoder
 
 
 #define shortIR_LF_in A4
@@ -36,7 +35,6 @@ using namespace ArduinoJson::Generator;
 #define shortIR_R_in A0
 #define shortIR_L_in A2
 
-//#define longIR_F_in A4
 /**********************/
 
 #define RisingEdgePerTurnRight_200 389 // 392
@@ -90,7 +88,7 @@ void setPinsMode() {
     //analog pins no need
     //so IR sensor no need
     //digital pins are set in URM37.h
-    //
+
     pinMode(motor_R, INPUT);
     pinMode(motor_L, INPUT);
 }
@@ -259,11 +257,9 @@ void explorationFLow() {
 
     //START Exploration flow
     counter_for_straighten = stepToStraighten;
-    //every 3 or 5 step do a straighten
 
     //CASE #1
     //West Wall
-    
     if (currentX <= 2) {
         goToGoal();
         goToStart();
