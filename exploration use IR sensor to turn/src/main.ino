@@ -39,14 +39,14 @@ using namespace ArduinoJson::Generator;
 //#define longIR_F_in A4
 /**********************/
 
-#define RisingEdgePerTurnRight_200 387 // 392
+#define RisingEdgePerTurnRight_200 389 // 392
 #define RisingEdgePerTurnLeft_200 392  // 394
 #define RisingEdgePerGrid_300 276
 #define RisingEdgeForSP 295
 //Speed
 #define slowSpeed 200
 #define speedModeSpeed 300
-#define fastRunSpeed 380
+#define fastRunSpeed 385
 #define adjustDirectionSpeed 50
 #define adjustDistanceSpeed 90
 //auto align frequence
@@ -138,19 +138,19 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    delay(1000);
-    i = 13;
-    while (--i) {
-        turn(1);
-        delay(200);
-    }
-
     // delay(1000);
     // i = 13;
     // while (--i) {
-    //     turn(-1);
+    //     turn(1);
     //     delay(200);
     // }
+
+    delay(1000);
+    i = 13;
+    while (--i) {
+        turn(-1);
+        delay(200);
+    }
 
 }
 
@@ -159,17 +159,16 @@ void sptuning() {
     turn(-1);
     straighten();
     turn(1);
+    turn(1);
     delay(500);
     int grids = 17;
+    goAhead(7);
+    turn(-1);
+    goAhead(17);
     // while (grids-- != 0) {
     //     goAhead(1);
     //     delay(1000);
     // }
-    while (1) {
-        goAhead(11);
-        turn(1);
-        turn(1);
-    }
     // turn(-1);
     // straighten();
     // turn(-1);
@@ -184,7 +183,7 @@ void turnAndGoTuning() {
 
 void loop() {
     //sptuning();
-    //dailyTuning();
+    dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
@@ -747,9 +746,7 @@ void goAhead(int grids) {
                 break;
         default: break;
     }
-    //if (MODE != 2) {
-        delay(50);
-    //}
+    delay(50);
 }
 
 void turn(int turnRight) {
