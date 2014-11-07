@@ -261,7 +261,6 @@ void explorationFLow() {
     //West Wall
     if (currentX <= 2) {
         goToGoal();
-        goToStart();
         goto FinishExploration;
     } else
 
@@ -272,7 +271,6 @@ void explorationFLow() {
         goToStart();
         turn(1);
         goToGoal();
-        goToStart();
         goto FinishExploration;
     } else
 
@@ -282,7 +280,6 @@ void explorationFLow() {
         goToStart();
         turn(1);
         goToGoal();
-        goToStart();
         goto FinishExploration;
     } else
 
@@ -292,15 +289,14 @@ void explorationFLow() {
         goToStart();
         turn(1);
         goToGoal();
-        goToStart();
         goto FinishExploration;
     } else {
-        goToStart();
         goto FinishExploration;
     }
 
     FinishExploration:
 
+    goToStart();
     JsonObject<2> toRPi;
     toRPi["type"] = "status";
     toRPi["data"] = "END_EXP";
