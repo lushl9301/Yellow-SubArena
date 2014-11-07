@@ -136,12 +136,12 @@ void dailyTuning() {
     //     delay(1000);
     // }
 
-    // delay(1000);
-    // i = 13;
-    // while (--i) {
-    //     turn(1);
-    //     delay(200);
-    // }
+    delay(1000);
+    i = 13;
+    while (--i) {
+       turn(1);
+       delay(200);
+    }
 
     delay(1000);
     i = 13;
