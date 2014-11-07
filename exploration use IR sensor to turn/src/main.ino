@@ -157,12 +157,10 @@ void sptuning() {
     turn(-1);
     straighten();
     turn(1);
-    turn(1);
-    delay(500);
-    int grids = 17;
-    goAhead(7);
-    turn(-1);
     goAhead(17);
+    delay(500);
+    turn(1);
+    goAhead(12);
     // while (grids-- != 0) {
     //     goAhead(1);
     //     delay(1000);
@@ -181,7 +179,7 @@ void turnAndGoTuning() {
 
 void loop() {
     //sptuning();
-    dailyTuning();
+    //dailyTuning();
     //turnAndGoTuning();
     //delay(1000);
     
